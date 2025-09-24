@@ -26,6 +26,7 @@
     "express": "^5.1.0",
     "mongoose": "^8.18.1",
     "react-toastify": "^11.0.5",
+    "uuid": "^13.0.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
@@ -68,6 +69,7 @@
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
     "@types/three": "^0.176.0",
+    "@types/uuid": "^11.0.0",
     "@vitejs/plugin-react-swc": "^4.0.0",
     "autoprefixer": "^10.4.21",
     "class-variance-authority": "^0.7.1",
