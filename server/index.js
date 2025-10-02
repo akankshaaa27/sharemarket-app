@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import mongoose from "mongoose";
 import { connectDB } from "./db.js";
 import shareholderRoutes from "./routes/shareholderRoutes.js";
 import dmatRoutes from "./routes/dmatRoutes.js";
@@ -18,9 +19,16 @@ export function createServer() {
   // Initiate DB connection (no-op if already connected)
   connectDB();
 
+  const ensureDB = (_req, res, next) => {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ error: "Database not connected" });
+    }
+    next();
+  };
+
   app.use("/api/shareholders", shareholderRoutes);
-  app.use("/api/dmat", dmatRoutes);
-  app.use("/api/client-profiles", clientProfileRoutes);
+  app.use("/api/dmat", ensureDB, dmatRoutes);
+  app.use("/api/client-profiles", ensureDB, clientProfileRoutes);
 
   return app;
 }
