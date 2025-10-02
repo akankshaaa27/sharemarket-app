@@ -11,6 +11,21 @@ const DistinctiveSchema = new Schema(
   { _id: false }
 );
 
+// Review sub-schema
+const ReviewSchema = new Schema(
+  {
+    status: {
+      type: String,
+      enum: ["pending", "approved", "rejected", "needs_attention"],
+      default: "pending",
+    },
+    notes: { type: String, trim: true, default: "" },
+    reviewedAt: { type: Date },
+    reviewedBy: { type: String, trim: true },
+  },
+  { _id: false }
+);
+
 // Company sub-schema
 const CompanySchema = new Schema(
   {
@@ -22,6 +37,16 @@ const CompanySchema = new Schema(
     quantity: { type: Number, default: 0 },
     faceValue: { type: Number, default: 0 },
     purchaseDate: { type: Date },
+    // Nested review object
+    review: {
+      type: ReviewSchema,
+      default: () => ({
+        status: "pending",
+        notes: "",
+        reviewedAt: null,
+        reviewedBy: ""
+      })
+    },
   },
   { _id: true }
 );
@@ -61,10 +86,13 @@ const ClientProfileSchema = new Schema(
   {
     shareholderName: ShareholderNameSchema,
     panNumber: { type: String, required: true, uppercase: true, trim: true, index: true },
+    aadhaarNumber: { type: String, trim: true }, // New Aadhaar field
     address: { type: String, trim: true },
     bankDetails: BankDetailsSchema,
     dematAccountNumber: { type: String, trim: true },
-    companies: [CompanySchema], // frontend maps shareHoldings -> companies
+    dematCreatedWith: { type: String, trim: true }, // New field for DMAT account creation platform
+    dematCreatedWithPerson: { type: String, trim: true }, // New field for DMAT account created by person
+    companies: [CompanySchema],
     currentDate: { type: Date, default: Date.now },
     status: {
       type: String,
@@ -77,5 +105,16 @@ const ClientProfileSchema = new Schema(
   },
   { timestamps: true }
 );
+
+// Index for better query performance on review status
+ClientProfileSchema.index({ "companies.review.status": 1 });
+
+// Index for Aadhaar number for better query performance
+ClientProfileSchema.index({ aadhaarNumber: 1 });
+
+// Index for demat account fields for better query performance
+ClientProfileSchema.index({ dematAccountNumber: 1 });
+ClientProfileSchema.index({ dematCreatedWith: 1 });
+ClientProfileSchema.index({ dematCreatedWithPerson: 1 });
 
 export default model("ClientProfile", ClientProfileSchema);
