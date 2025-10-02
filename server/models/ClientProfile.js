@@ -91,7 +91,8 @@ const ClientProfileSchema = new Schema(
     bankDetails: BankDetailsSchema,
     dematAccountNumber: { type: String, trim: true },
     dematCreatedWith: { type: String, trim: true }, // New field for DMAT account creation platform
-    dematCreatedWithPerson: { type: String, trim: true }, // New field for DMAT account created by person
+    dematCreatedWithPerson: { type: String, trim: true },
+    dematCreatedWithPersonNumber: { type: String, trim: true },
     companies: [CompanySchema],
     currentDate: { type: Date, default: Date.now },
     status: {
