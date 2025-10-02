@@ -155,6 +155,10 @@ export default function ClientProfiles() {
                     <label className="text-sm">DMAT Account Created By (Person)</label>
                     <input className="w-full border rounded p-2" value={form.dematCreatedWithPerson} onChange={(e)=>setForm(f=>({...f, dematCreatedWithPerson:e.target.value}))} placeholder="Person who created DMAT" />
                   </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Creator Contact Number</label>
+                    <input className="w-full border rounded p-2" value={form.dematCreatedWithPersonNumber||""} onChange={(e)=>setForm(f=>({...f, dematCreatedWithPersonNumber:e.target.value.replace(/\D/g,'').slice(0,15)}))} placeholder="Phone number" />
+                  </div>
                   <div className="col-span-2 space-y-1">
                     <label className="text-sm">Address</label>
                     <input className="w-full border rounded p-2" value={form.address} onChange={(e)=>setForm(f=>({...f, address:e.target.value}))} />
