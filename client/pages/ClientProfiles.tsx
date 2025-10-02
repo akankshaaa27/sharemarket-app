@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify"; // Add this import
+import { toast } from "react-toastify";
 
 import { api, Paginated } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -33,9 +33,12 @@ export interface ClientProfile {
   _id: string;
   shareholderName: ShareholderName;
   panNumber: string;
+  aadhaarNumber?: string;
   address?: string;
   bankDetails?: BankDetails;
   dematAccountNumber?: string;
+  dematCreatedWith?: string;
+  dematCreatedWithPerson?: string; // New field
   shareHoldings: ShareHolding[];
   currentDate?: string;
   status: "Active" | "Closed" | "Pending" | "Suspended";
@@ -66,9 +69,12 @@ export default function ClientProfiles() {
   const empty: Payload = {
     shareholderName: { name1: "", name2: "", name3: "" },
     panNumber: "",
+    aadhaarNumber: "",
     address: "",
     bankDetails: { bankNumber: "", branch: "", bankName: "", ifscCode: "", micrCode: "" },
     dematAccountNumber: "",
+    dematCreatedWith: "",
+    dematCreatedWithPerson: "", // New field
     shareHoldings: [emptyShareHolding],
     currentDate: new Date().toISOString().slice(0, 10),
     status: "Active",
@@ -255,14 +261,37 @@ export default function ClientProfiles() {
         r.panNumber
     },
     {
+      key: "aadhaarNumber",
+      header: "Aadhaar",
+      render: (r: ClientProfile) => editing?._id === r._id ?
+        <Input
+          value={editing.aadhaarNumber || ""}
+          onChange={(e) => setEditing({ 
+            ...editing, 
+            aadhaarNumber: e.target.value.replace(/\D/g, '').slice(0, 12)
+          })}
+        /> :
+        (r.aadhaarNumber || "—")
+    },
+    {
       key: "dematAccountNumber",
-      header: "Demat",
+      header: "Demat Account",
       render: (r: ClientProfile) => editing?._id === r._id ?
         <Input
           value={editing.dematAccountNumber || ""}
           onChange={(e) => setEditing({ ...editing, dematAccountNumber: e.target.value })}
         /> :
         (r.dematAccountNumber || "—")
+    },
+    {
+      key: "dematCreatedWithPerson",
+      header: "DMAT Created By",
+      render: (r: ClientProfile) => editing?._id === r._id ?
+        <Input
+          value={editing.dematCreatedWithPerson || ""}
+          onChange={(e) => setEditing({ ...editing, dematCreatedWithPerson: e.target.value })}
+        /> :
+        (r.dematCreatedWithPerson || "—")
     },
     {
       key: "companies",
@@ -350,7 +379,7 @@ export default function ClientProfiles() {
         <h1 className="text-2xl font-bold tracking-tight">Client Profiles</h1>
         <div className="flex items-center gap-2">
           <Input
-            placeholder="Search name/PAN/company"
+            placeholder="Search name/PAN/Aadhaar/company"
             value={q}
             onChange={(e) => { setQ(e.target.value); setPage(1); }}
             className="w-64"
@@ -411,10 +440,41 @@ export default function ClientProfiles() {
                   </div>
 
                   <div className="space-y-1">
-                    <Label>Demat Account</Label>
+                    <Label>Aadhaar Number</Label>
+                    <Input
+                      value={form.aadhaarNumber}
+                      onChange={(e) => setForm(f => ({ 
+                        ...f, 
+                        aadhaarNumber: e.target.value.replace(/\D/g, '').slice(0, 12)
+                      }))}
+                      placeholder="12-digit Aadhaar number"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label>Demat Account Number</Label>
                     <Input
                       value={form.dematAccountNumber}
                       onChange={(e) => setForm(f => ({ ...f, dematAccountNumber: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label>Demat Account Created With</Label>
+                    <Input
+                      value={form.dematCreatedWith}
+                      onChange={(e) => setForm(f => ({ ...f, dematCreatedWith: e.target.value }))}
+                      placeholder="e.g., NSDL, CDSL, Bank Name"
+                    />
+                  </div>
+
+                  {/* New DMAT Created With Person Field */}
+                  <div className="space-y-1">
+                    <Label>DMAT Account Created By (Person)</Label>
+                    <Input
+                      value={form.dematCreatedWithPerson}
+                      onChange={(e) => setForm(f => ({ ...f, dematCreatedWithPerson: e.target.value }))}
+                      placeholder="Name of the person who created DMAT"
                     />
                   </div>
 
@@ -798,10 +858,41 @@ export default function ClientProfiles() {
                 </div>
 
                 <div className="space-y-1">
-                  <Label>Demat Account</Label>
+                  <Label>Aadhaar Number</Label>
+                  <Input
+                    value={editing.aadhaarNumber || ""}
+                    onChange={(e) => setEditing({ 
+                      ...editing, 
+                      aadhaarNumber: e.target.value.replace(/\D/g, '').slice(0, 12)
+                    })}
+                    placeholder="12-digit Aadhaar number"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label>Demat Account Number</Label>
                   <Input
                     value={editing.dematAccountNumber || ""}
                     onChange={(e) => setEditing({ ...editing, dematAccountNumber: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label>Demat Account Created With</Label>
+                  <Input
+                    value={editing.dematCreatedWith || ""}
+                    onChange={(e) => setEditing({ ...editing, dematCreatedWith: e.target.value })}
+                    placeholder="e.g., NSDL, CDSL, Bank Name"
+                  />
+                </div>
+
+                {/* New DMAT Created With Person Field in Edit */}
+                <div className="space-y-1">
+                  <Label>DMAT Account Created By (Person)</Label>
+                  <Input
+                    value={editing.dematCreatedWithPerson || ""}
+                    onChange={(e) => setEditing({ ...editing, dematCreatedWithPerson: e.target.value })}
+                    placeholder="Name of the person who created DMAT"
                   />
                 </div>
 
