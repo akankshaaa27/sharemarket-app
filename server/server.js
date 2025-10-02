@@ -1,16 +1,24 @@
-import { createServer } from "./index.js";
+import { createServer } from "./app.js";
 import { connectDB } from "./db.js";
 
-const app = createServer();
 const PORT = process.env.PORT || 5000;
 
-connectDB()
-  .then(() => {
-    app.listen(PORT, () =>
-      console.log(`🚀 Express API running on http://localhost:${PORT}`),
-    );
-  })
-  .catch((err) => {
-    console.error("Failed to connect to DB:", err);
+async function startServer() {
+  try {
+    // Connect to database first
+    await connectDB();
+    
+    // Then create and start server
+    const app = createServer();
+    
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on http://localhost:${PORT}`);
+      console.log(`📊 Database: ${process.env.DB_NAME}`);
+    });
+  } catch (error) {
+    console.error("❌ Failed to start server:", error);
     process.exit(1);
-  });
+  }
+}
+
+startServer();
