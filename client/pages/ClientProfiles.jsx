@@ -277,7 +277,7 @@ export default function ClientProfiles() {
                       <button type="button" onClick={()=>removeShareHolding(idx)} disabled={form.shareHoldings.length===1} className="absolute top-2 right-2 text-sm px-2 py-1 rounded border">Remove</button>
                       <div className="col-span-2 font-medium text-sm text-muted-foreground">Company #{idx+1}</div>
                       <div className="space-y-1">
-                        <label className="text-sm">Company Name *</nlabel>
+                        <label className="text-sm">Company Name *</label>
                         <input className="w-full border rounded p-2" value={h.companyName} onChange={(e)=>updateShareHolding(idx,'companyName',e.target.value)} />
                       </div>
                       <div className="space-y-1">
