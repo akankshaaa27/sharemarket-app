@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from "uuid";
 const filePath = path.join(process.cwd(), "data", "shareholders.json");
 
 function readFile() {
+  const dirPath = path.join(process.cwd(), "data");
+  if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
   if (!fs.existsSync(filePath)) fs.writeFileSync(filePath, JSON.stringify([]));
   const data = fs.readFileSync(filePath);
   return JSON.parse(data);
