@@ -16,4 +16,4 @@ const DmatAccountSchema = new Schema(
   { timestamps: true }
 );
 
-export default model("DmatAccount", DmatAccountSchema);
+export default mongoose.models.DmatAccount || model("DmatAccount", DmatAccountSchema);

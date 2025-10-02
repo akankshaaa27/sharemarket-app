@@ -117,4 +117,4 @@ ClientProfileSchema.index({ dematAccountNumber: 1 });
 ClientProfileSchema.index({ dematCreatedWith: 1 });
 ClientProfileSchema.index({ dematCreatedWithPerson: 1 });
 
-export default model("ClientProfile", ClientProfileSchema);
+export default mongoose.models.ClientProfile || model("ClientProfile", ClientProfileSchema);
