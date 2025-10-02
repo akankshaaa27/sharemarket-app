@@ -14,10 +14,38 @@ function Layout({ children }) {
         <div className="container flex items-center justify-between py-4">
           <h1 className="text-xl font-semibold">ShareMarket Manager Pro</h1>
           <nav className="flex gap-4 text-sm">
-            <NavLink to="/" className={({isActive})=>`hover:underline ${isActive?"text-primary":""}`}>Dashboard</NavLink>
-            <NavLink to="/shareholders" className={({isActive})=>`hover:underline ${isActive?"text-primary":""}`}>Shareholders</NavLink>
-            <NavLink to="/dmat" className={({isActive})=>`hover:underline ${isActive?"text-primary":""}`}>DMAT</NavLink>
-            <NavLink to="/profiles" className={({isActive})=>`hover:underline ${isActive?"text-primary":""}`}>Profiles</NavLink>
+            <NavLink
+              to="/"
+              className={({ isActive }) =>
+                `hover:underline ${isActive ? "text-primary" : ""}`
+              }
+            >
+              Dashboard
+            </NavLink>
+            <NavLink
+              to="/shareholders"
+              className={({ isActive }) =>
+                `hover:underline ${isActive ? "text-primary" : ""}`
+              }
+            >
+              Shareholders
+            </NavLink>
+            <NavLink
+              to="/dmat"
+              className={({ isActive }) =>
+                `hover:underline ${isActive ? "text-primary" : ""}`
+              }
+            >
+              DMAT
+            </NavLink>
+            <NavLink
+              to="/profiles"
+              className={({ isActive }) =>
+                `hover:underline ${isActive ? "text-primary" : ""}`
+              }
+            >
+              Profiles
+            </NavLink>
           </nav>
         </div>
       </header>

@@ -12,7 +12,9 @@ export default function Shareholders() {
     setItems(res.data || res);
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   async function onCreate(e) {
     e.preventDefault();
@@ -22,8 +24,11 @@ export default function Shareholders() {
       await api.createShareholder({ name: form.name, pan: form.pan });
       setForm({ name: "", pan: "" });
       await load();
-    } catch (e) { setError(e.message); }
-    finally { setLoading(false); }
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function onDelete(id) {
@@ -37,14 +42,28 @@ export default function Shareholders() {
       <form onSubmit={onCreate} className="grid gap-2 max-w-md">
         <div>
           <label className="block text-sm">Name</label>
-          <input className="w-full border rounded p-2" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} required />
+          <input
+            className="w-full border rounded p-2"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            required
+          />
         </div>
         <div>
           <label className="block text-sm">PAN</label>
-          <input className="w-full border rounded p-2" value={form.pan} onChange={e=>setForm({...form,pan:e.target.value})} />
+          <input
+            className="w-full border rounded p-2"
+            value={form.pan}
+            onChange={(e) => setForm({ ...form, pan: e.target.value })}
+          />
         </div>
         {error && <p className="text-red-600 text-sm">{error}</p>}
-        <button disabled={loading} className="bg-primary text-primary-foreground px-4 py-2 rounded disabled:opacity-50">Add</button>
+        <button
+          disabled={loading}
+          className="bg-primary text-primary-foreground px-4 py-2 rounded disabled:opacity-50"
+        >
+          Add
+        </button>
       </form>
 
       <div className="overflow-x-auto">
@@ -57,12 +76,17 @@ export default function Shareholders() {
             </tr>
           </thead>
           <tbody>
-            {items.map((s)=> (
+            {items.map((s) => (
               <tr key={s._id} className="border-t">
                 <td className="p-2">{s.name || s.shareholderName?.name1}</td>
                 <td className="p-2">{s.pan}</td>
                 <td className="p-2 text-center">
-                  <button onClick={()=>onDelete(s._id)} className="text-red-600 hover:underline">Delete</button>
+                  <button
+                    onClick={() => onDelete(s._id)}
+                    className="text-red-600 hover:underline"
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}

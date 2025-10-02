@@ -10,12 +10,26 @@ export default function Index() {
     let mounted = true;
     async function load() {
       try {
-        const [{ total: sTotal }, { total: pTotal }, { total: dTotal }] = await Promise.all([
-          api.listShareholders().then((r) => ({ total: r.total || (r.data?.length ?? r.length ?? 0) })),
-          api.listProfiles().then((r) => ({ total: r.total || (r.data?.length ?? r.length ?? 0) })),
-          api.listDmat().then((r) => ({ total: r.total || (r.data?.length ?? r.length ?? 0) })),
-        ]);
-        if (mounted) setStats({ shareholders: sTotal, profiles: pTotal, dmat: dTotal });
+        const [{ total: sTotal }, { total: pTotal }, { total: dTotal }] =
+          await Promise.all([
+            api
+              .listShareholders()
+              .then((r) => ({
+                total: r.total || (r.data?.length ?? r.length ?? 0),
+              })),
+            api
+              .listProfiles()
+              .then((r) => ({
+                total: r.total || (r.data?.length ?? r.length ?? 0),
+              })),
+            api
+              .listDmat()
+              .then((r) => ({
+                total: r.total || (r.data?.length ?? r.length ?? 0),
+              })),
+          ]);
+        if (mounted)
+          setStats({ shareholders: sTotal, profiles: pTotal, dmat: dTotal });
       } catch (e) {
         if (mounted) setError(e.message || "Failed to load dashboard");
       } finally {
@@ -23,7 +37,9 @@ export default function Index() {
       }
     }
     load();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   if (loading) return <p>Loading...</p>;

@@ -6,7 +6,9 @@ const PORT = process.env.PORT || 5000;
 
 connectDB()
   .then(() => {
-    app.listen(PORT, () => console.log(`🚀 Express API running on http://localhost:${PORT}`));
+    app.listen(PORT, () =>
+      console.log(`🚀 Express API running on http://localhost:${PORT}`),
+    );
   })
   .catch((err) => {
     console.error("Failed to connect to DB:", err);

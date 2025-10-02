@@ -10,10 +10,13 @@ export default function ClientProfileDetails() {
 
   useEffect(() => {
     let mounted = true;
-    api.getProfile(id)
+    api
+      .getProfile(id)
       .then(setItem)
-      .catch((e)=> setError(e.message));
-    return () => { mounted = false; };
+      .catch((e) => setError(e.message));
+    return () => {
+      mounted = false;
+    };
   }, [id]);
 
   async function onDelete() {
@@ -30,7 +33,9 @@ export default function ClientProfileDetails() {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">{item.shareholderName?.name1}</h2>
         <div className="space-x-2">
-          <button onClick={onDelete} className="text-red-600">Delete</button>
+          <button onClick={onDelete} className="text-red-600">
+            Delete
+          </button>
         </div>
       </div>
       <div className="grid md:grid-cols-2 gap-4">
@@ -42,10 +47,18 @@ export default function ClientProfileDetails() {
         </div>
         <div className="rounded border p-4 bg-card">
           <h3 className="font-medium mb-2">Demat</h3>
-          <div className="text-sm">Number: {item.dematAccountNumber || "-"}</div>
-          <div className="text-sm">Created With: {item.dematCreatedWith || "-"}</div>
-          <div className="text-sm">Created By: {item.dematCreatedWithPerson || "-"}</div>
-          <div className="text-sm">Creator Contact: {item.dematCreatedWithPersonNumber || "-"}</div>
+          <div className="text-sm">
+            Number: {item.dematAccountNumber || "-"}
+          </div>
+          <div className="text-sm">
+            Created With: {item.dematCreatedWith || "-"}
+          </div>
+          <div className="text-sm">
+            Created By: {item.dematCreatedWithPerson || "-"}
+          </div>
+          <div className="text-sm">
+            Creator Contact: {item.dematCreatedWithPersonNumber || "-"}
+          </div>
         </div>
       </div>
 
@@ -62,7 +75,7 @@ export default function ClientProfileDetails() {
               </tr>
             </thead>
             <tbody>
-              {item.companies?.map((c)=> (
+              {item.companies?.map((c) => (
                 <tr key={c._id} className="border-t">
                   <td className="p-2">{c.companyName}</td>
                   <td className="p-2">{c.isinNumber}</td>
