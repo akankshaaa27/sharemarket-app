@@ -1,38 +1,26 @@
 import "dotenv/config";
-import express from "express";
-import cors from "cors";
 import mongoose from "mongoose";
-import shareholderRoutes from "./routes/shareholderRoutes.js";
-import dmatRoutes from "./routes/dmatRoutes.js";
-import clientProfileRoutes from "./routes/clientProfileRoutes.js";
-import authRoutes from "./routes/authRoutes.js";
-import userRoutes from "./routes/userRoutes.js";
+import createServer from "./app.js";
 
-export function createServer() {
-  const app = express();
+const PORT = process.env.PORT || 5000;
+const MONGO_URI = process.env.MONGO_URI;
 
-  app.use(cors());
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+async function startServer() {
+  try {
+    await mongoose.connect(MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("MongoDB connected");
 
-  app.get("/api/ping", (_req, res) => res.json({ message: "pong" }));
-
-  // We remove the connectDB call from here because we are connecting in server.js
-
-  const ensureDB = (_req, res, next) => {
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ error: "Database not connected" });
-    }
-    next();
-  };
-
-  app.use("/api/auth", authRoutes);
-  app.use("/api/users", ensureDB, userRoutes);
-  app.use("/api/shareholders", shareholderRoutes);
-  app.use("/api/dmat", ensureDB, dmatRoutes);
-  app.use("/api/client-profiles", ensureDB, clientProfileRoutes);
-
-  return app;
+    const app = createServer();
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1); // exit if connection fails
+  }
 }
 
-export default createServer;
+startServer();
