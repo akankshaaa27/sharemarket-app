@@ -56,6 +56,7 @@ export default function ClientProfileDetails() {
   const [editingIndex, setEditingIndex] = useState(null);
   const [editedHolding, setEditedHolding] = useState(null);
   const [showReviewDialog, setShowReviewDialog] = useState(null); // number | null
+  const [showNotesTooltip, setShowNotesTooltip] = useState(null); // {index: number, notes: string} | null
 
   useEffect(() => {
     let mounted = true;
@@ -556,12 +557,22 @@ export default function ClientProfileDetails() {
                             {h.review?.status || "pending"}
                           </span>
                           {h.review?.notes && (
-                            <button
-                              className="text-blue-600 text-xs underline"
-                              onClick={() => toast.info(h.review?.notes)}
-                            >
-                              Notes
-                            </button>
+                            <div className="relative">
+                              <button
+                                className="text-blue-600 text-xs underline"
+                                onMouseEnter={() => 
+                                  setShowNotesTooltip({ index, notes: h.review.notes })
+                                }
+                                onMouseLeave={() => setShowNotesTooltip(null)}
+                              >
+                                Notes
+                              </button>
+                              {showNotesTooltip?.index === index && (
+                                <div className="absolute z-10 left-0 top-full mt-1 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg">
+                                  {h.review.notes}
+                                </div>
+                              )}
+                            </div>
                           )}
                         </div>
                       )}
@@ -1029,6 +1040,9 @@ export default function ClientProfileDetails() {
                 {(() => {
                   const idx = showReviewDialog;
                   const holding = filteredHoldings[idx];
+                  const [reviewStatus, setReviewStatus] = useState(holding.review?.status || "pending");
+                  const [reviewNotes, setReviewNotes] = useState(holding.review?.notes || "");
+
                   return (
                     <>
                       <div>
@@ -1041,16 +1055,8 @@ export default function ClientProfileDetails() {
                         <label className="text-sm">Review Status</label>
                         <select
                           className="w-full border rounded p-2"
-                          value={holding.review?.status || "pending"}
-                          onChange={(e) =>
-                            setEditedHolding((p) => ({
-                              ...(p || holding),
-                              review: {
-                                ...((p && p.review) || holding.review || {}),
-                                status: e.target.value,
-                              },
-                            }))
-                          }
+                          value={reviewStatus}
+                          onChange={(e) => setReviewStatus(e.target.value)}
                         >
                           {reviewStatusOptions.map((o) => (
                             <option key={o.value} value={o.value}>
@@ -1063,16 +1069,8 @@ export default function ClientProfileDetails() {
                         <label className="text-sm">Review Notes</label>
                         <textarea
                           className="w-full h-24 p-2 border rounded resize-none"
-                          defaultValue={holding.review?.notes || ""}
-                          onChange={(e) =>
-                            setEditedHolding((p) => ({
-                              ...(p || holding),
-                              review: {
-                                ...((p && p.review) || holding.review || {}),
-                                notes: e.target.value,
-                              },
-                            }))
-                          }
+                          value={reviewNotes}
+                          onChange={(e) => setReviewNotes(e.target.value)}
                         />
                       </div>
                       {holding.review?.reviewedAt && (
@@ -1092,15 +1090,7 @@ export default function ClientProfileDetails() {
                         <button
                           className="px-3 py-1.5 rounded border"
                           onClick={() =>
-                            saveReviewFor(
-                              idx,
-                              editedHolding?.review?.status ||
-                                holding.review?.status ||
-                                "pending",
-                              editedHolding?.review?.notes ||
-                                holding.review?.notes ||
-                                "",
-                            )
+                            saveReviewFor(idx, reviewStatus, reviewNotes)
                           }
                         >
                           {updating ? "Saving..." : "Save Review"}
