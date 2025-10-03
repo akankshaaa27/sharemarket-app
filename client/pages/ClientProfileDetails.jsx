@@ -41,6 +41,7 @@ function getShareHoldingsFrom(item) {
 }
 
 // Separate Review Dialog Component to fix hooks issue
+// Review Dialog Component (add this near the top of your file)
 function ReviewDialog({
   showReviewDialog,
   setShowReviewDialog,
@@ -65,6 +66,10 @@ function ReviewDialog({
 
   const holding = filteredHoldings[showReviewDialog];
 
+  const handleSave = () => {
+    saveReviewFor(showReviewDialog, reviewStatus, reviewNotes);
+  };
+
   return (
     <div className="fixed inset-0 z-50">
       <div
@@ -72,21 +77,28 @@ function ReviewDialog({
         onClick={() => setShowReviewDialog(null)}
       />
       <div className="absolute inset-0 grid place-items-center p-4">
-        <div className="w-full max-w-md bg-card text-foreground rounded-lg border shadow-md">
-          <div className="p-4 border-b">
-            <h3 className="font-semibold">Review Company</h3>
+        <div className="w-full max-w-md bg-white rounded-lg border shadow-lg">
+          <div className="p-4 border-b flex items-center justify-between">
+            <h3 className="font-semibold text-lg">Review Company</h3>
+            <button
+              onClick={() => setShowReviewDialog(null)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
           </div>
           <div className="p-4 space-y-4">
             <div>
-              <h4 className="font-semibold">{holding.companyName}</h4>
-              <p className="text-sm text-muted-foreground">
-                {holding.isinNumber}
+              <h4 className="font-semibold text-gray-900">{holding.companyName}</h4>
+              <p className="text-sm text-gray-600">
+                ISIN: {holding.isinNumber}
               </p>
             </div>
-            <div className="space-y-1">
-              <label className="text-sm">Review Status</label>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Review Status</label>
               <select
-                className="w-full border rounded p-2"
+                className="w-full border rounded p-2 text-sm"
                 value={reviewStatus}
                 onChange={(e) => setReviewStatus(e.target.value)}
               >
@@ -97,33 +109,34 @@ function ReviewDialog({
                 ))}
               </select>
             </div>
-            <div className="space-y-1">
-              <label className="text-sm">Review Notes</label>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Review Notes</label>
               <textarea
-                className="w-full h-24 p-2 border rounded resize-none"
+                className="w-full h-32 p-2 border rounded resize-none text-sm"
                 value={reviewNotes}
                 onChange={(e) => setReviewNotes(e.target.value)}
+                placeholder="Add your review notes here..."
               />
             </div>
+
             {holding.review?.reviewedAt && (
-              <div className="text-xs text-muted-foreground">
-                Last reviewed:{" "}
-                {formatDateTime(holding.review.reviewedAt)} by{" "}
-                {holding.review.reviewedBy}
+              <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
+                Last reviewed: {formatDateTime(holding.review.reviewedAt)} by {holding.review.reviewedBy}
               </div>
             )}
-            <div className="flex justify-end gap-2 pt-2">
+
+            <div className="flex justify-end gap-3 pt-2">
               <button
-                className="px-3 py-1.5 rounded border"
+                className="px-4 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50"
                 onClick={() => setShowReviewDialog(null)}
+                disabled={updating}
               >
                 Cancel
               </button>
               <button
-                className="px-3 py-1.5 rounded border"
-                onClick={() =>
-                  saveReviewFor(showReviewDialog, reviewStatus, reviewNotes)
-                }
+                className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-300"
+                onClick={handleSave}
                 disabled={updating}
               >
                 {updating ? "Saving..." : "Save Review"}
