@@ -40,6 +40,102 @@ function getShareHoldingsFrom(item) {
   }));
 }
 
+// Separate Review Dialog Component to fix hooks issue
+function ReviewDialog({
+  showReviewDialog,
+  setShowReviewDialog,
+  filteredHoldings,
+  saveReviewFor,
+  updating,
+  formatDateTime
+}) {
+  const [reviewStatus, setReviewStatus] = useState("pending");
+  const [reviewNotes, setReviewNotes] = useState("");
+
+  // Reset state when dialog opens/closes or when the holding changes
+  useEffect(() => {
+    if (showReviewDialog !== null) {
+      const holding = filteredHoldings[showReviewDialog];
+      setReviewStatus(holding.review?.status || "pending");
+      setReviewNotes(holding.review?.notes || "");
+    }
+  }, [showReviewDialog, filteredHoldings]);
+
+  if (showReviewDialog === null) return null;
+
+  const holding = filteredHoldings[showReviewDialog];
+
+  return (
+    <div className="fixed inset-0 z-50">
+      <div
+        className="absolute inset-0 bg-black/50"
+        onClick={() => setShowReviewDialog(null)}
+      />
+      <div className="absolute inset-0 grid place-items-center p-4">
+        <div className="w-full max-w-md bg-card text-foreground rounded-lg border shadow-md">
+          <div className="p-4 border-b">
+            <h3 className="font-semibold">Review Company</h3>
+          </div>
+          <div className="p-4 space-y-4">
+            <div>
+              <h4 className="font-semibold">{holding.companyName}</h4>
+              <p className="text-sm text-muted-foreground">
+                {holding.isinNumber}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm">Review Status</label>
+              <select
+                className="w-full border rounded p-2"
+                value={reviewStatus}
+                onChange={(e) => setReviewStatus(e.target.value)}
+              >
+                {reviewStatusOptions.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm">Review Notes</label>
+              <textarea
+                className="w-full h-24 p-2 border rounded resize-none"
+                value={reviewNotes}
+                onChange={(e) => setReviewNotes(e.target.value)}
+              />
+            </div>
+            {holding.review?.reviewedAt && (
+              <div className="text-xs text-muted-foreground">
+                Last reviewed:{" "}
+                {formatDateTime(holding.review.reviewedAt)} by{" "}
+                {holding.review.reviewedBy}
+              </div>
+            )}
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                className="px-3 py-1.5 rounded border"
+                onClick={() => setShowReviewDialog(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-3 py-1.5 rounded border"
+                onClick={() =>
+                  saveReviewFor(showReviewDialog, reviewStatus, reviewNotes)
+                }
+                disabled={updating}
+              >
+                {updating ? "Saving..." : "Save Review"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ClientProfileDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -557,26 +653,21 @@ export default function ClientProfileDetails() {
                         </select>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <span className="text-xs px-2 py-0.5 rounded border">
+                          <span className={`text-xs px-2 py-1 rounded border font-medium capitalize
+        ${h.review?.status === 'approved' ? 'bg-green-100 text-green-800 border-green-200' : ''}
+        ${h.review?.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' : ''}
+        ${h.review?.status === 'rejected' ? 'bg-red-100 text-red-800 border-red-200' : ''}
+        ${h.review?.status === 'needs_attention' ? 'bg-orange-100 text-orange-800 border-orange-200' : ''}
+      `}>
                             {h.review?.status || "pending"}
                           </span>
                           {h.review?.notes && (
-                            <div className="relative">
-                              <button
-                                className="text-blue-600 text-xs underline"
-                                onMouseEnter={() => 
-                                  setShowNotesTooltip({ index, notes: h.review.notes })
-                                }
-                                onMouseLeave={() => setShowNotesTooltip(null)}
-                              >
-                                Notes
-                              </button>
-                              {showNotesTooltip?.index === index && (
-                                <div className="absolute z-10 left-0 top-full mt-1 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg">
-                                  {h.review.notes}
-                                </div>
-                              )}
-                            </div>
+                            <button
+                              className="text-blue-600 text-xs underline hover:text-blue-800"
+                              onClick={() => setShowReviewDialog(index)}
+                            >
+                              Notes
+                            </button>
                           )}
                         </div>
                       )}
@@ -1029,85 +1120,14 @@ export default function ClientProfileDetails() {
       )}
 
       {/* Review Dialog */}
-      {showReviewDialog !== null && (
-        <div className="fixed inset-0 z-50">
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setShowReviewDialog(null)}
-          />
-          <div className="absolute inset-0 grid place-items-center p-4">
-            <div className="w-full max-w-md bg-card text-foreground rounded-lg border shadow-md">
-              <div className="p-4 border-b">
-                <h3 className="font-semibold">Review Company</h3>
-              </div>
-              <div className="p-4 space-y-4">
-                {(() => {
-                  const idx = showReviewDialog;
-                  const holding = filteredHoldings[idx];
-                  const [reviewStatus, setReviewStatus] = useState(holding.review?.status || "pending");
-                  const [reviewNotes, setReviewNotes] = useState(holding.review?.notes || "");
-
-                  return (
-                    <>
-                      <div>
-                        <h4 className="font-semibold">{holding.companyName}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {holding.isinNumber}
-                        </p>
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-sm">Review Status</label>
-                        <select
-                          className="w-full border rounded p-2"
-                          value={reviewStatus}
-                          onChange={(e) => setReviewStatus(e.target.value)}
-                        >
-                          {reviewStatusOptions.map((o) => (
-                            <option key={o.value} value={o.value}>
-                              {o.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-sm">Review Notes</label>
-                        <textarea
-                          className="w-full h-24 p-2 border rounded resize-none"
-                          value={reviewNotes}
-                          onChange={(e) => setReviewNotes(e.target.value)}
-                        />
-                      </div>
-                      {holding.review?.reviewedAt && (
-                        <div className="text-xs text-muted-foreground">
-                          Last reviewed:{" "}
-                          {formatDateTime(holding.review.reviewedAt)} by{" "}
-                          {holding.review.reviewedBy}
-                        </div>
-                      )}
-                      <div className="flex justify-end gap-2 pt-2">
-                        <button
-                          className="px-3 py-1.5 rounded border"
-                          onClick={() => setShowReviewDialog(null)}
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          className="px-3 py-1.5 rounded border"
-                          onClick={() =>
-                            saveReviewFor(idx, reviewStatus, reviewNotes)
-                          }
-                        >
-                          {updating ? "Saving..." : "Save Review"}
-                        </button>
-                      </div>
-                    </>
-                  );
-                })()}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <ReviewDialog
+        showReviewDialog={showReviewDialog}
+        setShowReviewDialog={setShowReviewDialog}
+        filteredHoldings={filteredHoldings}
+        saveReviewFor={saveReviewFor}
+        updating={updating}
+        formatDateTime={formatDateTime}
+      />
     </div>
   );
 }
