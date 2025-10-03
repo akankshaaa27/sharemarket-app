@@ -1,37 +1,24 @@
-import express from "express";
-import cors from "cors";
+import { createServer } from "./app.js";
 import { connectDB } from "./db.js";
-import shareholderRoutes from "./routes/shareholderRoutes.js";
-import dmatRoutes from "./routes/dmatRoutes.js";
-import clientProfileRoutes from "./routes/clientProfileRoutes.js"; // make sure this matches your router file
 
-const app = express();
-
-// Middlewares
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Test endpoint
-app.get("/api/ping", (_req, res) => res.json({ message: "pong" }));
-
-// Register routes
-app.use("/api/shareholders", shareholderRoutes);
-app.use("/api/dmat", dmatRoutes);
-app.use("/api/client-profiles", clientProfileRoutes); // ✅ correctly using imported router
-
-// Start server after DB connection
 const PORT = process.env.PORT || 5000;
 
-connectDB()
-  .then(() => {
-    app.listen(PORT, () =>
-      console.log(`🚀 Express API running on http://localhost:${PORT}`)
-    );
-  })
-  .catch((err) => {
-    console.error("Failed to connect to DB:", err);
+async function startServer() {
+  try {
+    // Connect to database first
+    await connectDB();
+    
+    // Then create and start server
+    const app = createServer();
+    
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on http://localhost:${PORT}`);
+      console.log(`📊 Database: ${process.env.DB_NAME}`);
+    });
+  } catch (error) {
+    console.error("❌ Failed to start server:", error);
     process.exit(1);
-  });
+  }
+}
 
-export default app;
+startServer();

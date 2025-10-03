@@ -8,7 +8,7 @@ const DistinctiveSchema = new Schema(
     from: { type: String, trim: true },
     to: { type: String, trim: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 // Review sub-schema
@@ -23,7 +23,7 @@ const ReviewSchema = new Schema(
     reviewedAt: { type: Date },
     reviewedBy: { type: String, trim: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 // Company sub-schema
@@ -44,11 +44,11 @@ const CompanySchema = new Schema(
         status: "pending",
         notes: "",
         reviewedAt: null,
-        reviewedBy: ""
-      })
+        reviewedBy: "",
+      }),
     },
   },
-  { _id: true }
+  { _id: true },
 );
 
 // Bank details sub-schema
@@ -60,7 +60,7 @@ const BankDetailsSchema = new Schema(
     ifscCode: { type: String, uppercase: true, trim: true },
     micrCode: { type: String, trim: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 // Shareholder names sub-schema
@@ -70,7 +70,7 @@ const ShareholderNameSchema = new Schema(
     name2: { type: String, trim: true },
     name3: { type: String, trim: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 // Dividend sub-schema
@@ -79,19 +79,26 @@ const DividendSchema = new Schema(
     amount: { type: Number, default: 0 },
     date: { type: Date },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const ClientProfileSchema = new Schema(
   {
     shareholderName: ShareholderNameSchema,
-    panNumber: { type: String, required: true, uppercase: true, trim: true, index: true },
+    panNumber: {
+      type: String,
+      required: true,
+      uppercase: true,
+      trim: true,
+      index: true,
+    },
     aadhaarNumber: { type: String, trim: true }, // New Aadhaar field
     address: { type: String, trim: true },
     bankDetails: BankDetailsSchema,
     dematAccountNumber: { type: String, trim: true },
     dematCreatedWith: { type: String, trim: true }, // New field for DMAT account creation platform
-    dematCreatedWithPerson: { type: String, trim: true }, // New field for DMAT account created by person
+    dematCreatedWithPerson: { type: String, trim: true },
+    dematCreatedWithPersonNumber: { type: String, trim: true },
     companies: [CompanySchema],
     currentDate: { type: Date, default: Date.now },
     status: {
@@ -103,7 +110,7 @@ const ClientProfileSchema = new Schema(
     remarks: { type: String, trim: true },
     dividend: DividendSchema,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Index for better query performance on review status
@@ -117,4 +124,5 @@ ClientProfileSchema.index({ dematAccountNumber: 1 });
 ClientProfileSchema.index({ dematCreatedWith: 1 });
 ClientProfileSchema.index({ dematCreatedWithPerson: 1 });
 
-export default model("ClientProfile", ClientProfileSchema);
+export default mongoose.models.ClientProfile ||
+  model("ClientProfile", ClientProfileSchema);

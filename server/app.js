@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-import { connectDB } from "./db.js";
+// Remove the import of connectDB from here if we are not using it in this file
 import shareholderRoutes from "./routes/shareholderRoutes.js";
 import dmatRoutes from "./routes/dmatRoutes.js";
 import clientProfileRoutes from "./routes/clientProfileRoutes.js";
@@ -16,8 +16,7 @@ export function createServer() {
 
   app.get("/api/ping", (_req, res) => res.json({ message: "pong" }));
 
-  // Initiate DB connection (no-op if already connected)
-  connectDB();
+  // We remove the connectDB call from here because we are connecting in server.js
 
   const ensureDB = (_req, res, next) => {
     if (mongoose.connection.readyState !== 1) {
