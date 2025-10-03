@@ -5,10 +5,15 @@ import path from "path";
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 5173,
-    host: true,
+    port: 5000,
+    host: "0.0.0.0",
+    strictPort: true,
+    allowedHosts: true,
+    hmr: {
+      clientPort: 5000,
+    },
     proxy: {
-      "/api": "http://localhost:5000", // forward API calls to backend
+      "/api": "http://localhost:3000",
     },
   },
   build: { outDir: "dist/spa" },

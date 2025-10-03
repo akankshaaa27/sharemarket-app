@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../lib/api.js";
 import { toast } from "react-toastify";
+import { exportClientProfileToExcel } from "../lib/export.js";
 
 // Review status options
 const reviewStatusOptions = [
@@ -285,8 +286,11 @@ export default function ClientProfileDetails() {
             Print
           </button>
           <button
-            className="px-3 py-1.5 rounded border"
-            onClick={() => toast.info("Export coming soon")}
+            className="px-3 py-1.5 rounded border bg-green-50 text-green-700 hover:bg-green-100"
+            onClick={() => {
+              exportClientProfileToExcel(client);
+              toast.success("Profile exported to Excel");
+            }}
           >
             Export
           </button>

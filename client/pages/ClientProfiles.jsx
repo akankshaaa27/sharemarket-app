@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api.js";
+import { toast } from "react-toastify";
+import { exportAllClientProfilesToExcel } from "../lib/export.js";
+import { Download } from "lucide-react";
 
 const reviewStatusOptions = [
   { value: "pending", label: "Pending Review" },
@@ -218,17 +221,30 @@ export default function ClientProfiles() {
           />
           <button
             onClick={() => load({ q })}
-            className="bg-primary text-primary-foreground px-4 py-2 rounded"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
             Search
           </button>
         </div>
-        <button
-          onClick={() => setOpen(true)}
-          className="bg-primary text-primary-foreground px-4 py-2 rounded"
-        >
-          Add Client
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              exportAllClientProfilesToExcel(items);
+              toast.success(`Exported ${items.length} client profiles to Excel`);
+            }}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2"
+            disabled={items.length === 0}
+          >
+            <Download size={18} />
+            Export All ({items.length})
+          </button>
+          <button
+            onClick={() => setOpen(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Add Client
+          </button>
+        </div>
       </div>
 
       {error && <p className="text-red-600 text-sm">{error}</p>}
