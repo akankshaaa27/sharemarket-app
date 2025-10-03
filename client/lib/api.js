@@ -1,8 +1,9 @@
 const API_BASE = "/api";
 
 async function request(path, options = {}) {
+  const token = typeof localStorage !== "undefined" ? localStorage.getItem("token") : null;
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     credentials: "same-origin",
     ...options,
   });
