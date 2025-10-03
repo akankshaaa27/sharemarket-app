@@ -1,5 +1,9 @@
 import express from "express";
 import ClientProfile from "../models/ClientProfile.js";
+import User from "../models/User.js";
+import bcrypt from "bcryptjs";
+import { sendMail } from "../utils/mailer.js";
+import XLSX from "xlsx";
 
 const router = express.Router();
 
@@ -47,10 +51,42 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// POST create
+// POST create (also auto-create user)
 router.post("/", async (req, res) => {
   try {
     const created = await ClientProfile.create(req.body);
+
+    // Auto-create user account for client
+    const email = created?.email || req.body?.email || null;
+    const phone = created?.phone || req.body?.phone || null;
+
+    const baseName = created?.shareholderName?.name1 || "client";
+    const username = (req.body?.username || `${baseName}`)
+      .toLowerCase()
+      .replace(/\s+/g, "")
+      .slice(0, 18) + Math.random().toString(36).slice(2, 6);
+    const plain = req.body?.password || Math.random().toString(36).slice(2, 10);
+    const passwordHash = await bcrypt.hash(plain, 10);
+
+    await User.create({
+      username,
+      name: baseName,
+      email,
+      phone,
+      role: "client",
+      passwordHash,
+      passwordPlain: plain,
+      assignedClientIds: [created._id],
+    });
+
+    if (email) {
+      await sendMail({
+        to: email,
+        subject: "Your Account Credentials",
+        text: `Username: ${username}\nEmail: ${email}\nPassword: ${plain}`,
+      });
+    }
+
     res.status(201).json(created);
   } catch (e) {
     res.status(400).json({ error: e.message });
@@ -76,6 +112,38 @@ router.delete("/:id", async (req, res) => {
   const deleted = await ClientProfile.findByIdAndDelete(req.params.id);
   if (!deleted) return res.status(404).json({ error: "Not found" });
   res.json({ success: true });
+});
+
+// Export all to Excel
+router.get("/export", async (_req, res) => {
+  const items = await ClientProfile.find({}).lean();
+  const sheet = XLSX.utils.json_to_sheet(items.map((i) => ({
+    id: i._id?.toString(),
+    name1: i.shareholderName?.name1,
+    panNumber: i.panNumber,
+    status: i.status,
+    dematAccountNumber: i.dematAccountNumber,
+  })));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, sheet, "Clients");
+  const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+  res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  res.setHeader("Content-Disposition", "attachment; filename=clients.xlsx");
+  res.send(buf);
+});
+
+// Export single profile
+router.get("/:id/export", async (req, res) => {
+  const item = await ClientProfile.findById(req.params.id).lean();
+  if (!item) return res.status(404).json({ error: "Not found" });
+  const rows = [item];
+  const sheet = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, sheet, "Profile");
+  const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+  res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  res.setHeader("Content-Disposition", `attachment; filename=client-${item._id}.xlsx`);
+  res.send(buf);
 });
 
 export default router;
