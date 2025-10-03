@@ -57,7 +57,7 @@ export default function ClientProfileDetails() {
             Created By: {item.dematCreatedWithPerson || "-"}
           </div>
           <div className="text-sm">
-            Creator Contact: {item.dematCreatedWithPersonNumber || "-"}
+            Creator Contact Number: {item.dematCreatedWithPersonNumber || "-"}
           </div>
         </div>
       </div>
