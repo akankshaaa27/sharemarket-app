@@ -25,6 +25,7 @@
     "f": "^1.4.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.0",
+    "nodemailer": "^7.0.6",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
