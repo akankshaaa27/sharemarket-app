@@ -84,6 +84,11 @@ const DividendSchema = new Schema(
 
 const ClientProfileSchema = new Schema(
   {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      index: true,
+    },
     shareholderName: ShareholderNameSchema,
     panNumber: {
       type: String,

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../lib/api.js";
 import { toast } from "react-toastify";
+import { exportClientProfileToExcel } from "../lib/export.js";
 
 // Review status options
 const reviewStatusOptions = [
@@ -37,6 +38,115 @@ function getShareHoldingsFrom(item) {
       reviewedBy: h?.review?.reviewedBy || "",
     },
   }));
+}
+
+// Separate Review Dialog Component to fix hooks issue
+// Review Dialog Component (add this near the top of your file)
+function ReviewDialog({
+  showReviewDialog,
+  setShowReviewDialog,
+  filteredHoldings,
+  saveReviewFor,
+  updating,
+  formatDateTime
+}) {
+  const [reviewStatus, setReviewStatus] = useState("pending");
+  const [reviewNotes, setReviewNotes] = useState("");
+
+  // Reset state when dialog opens/closes or when the holding changes
+  useEffect(() => {
+    if (showReviewDialog !== null) {
+      const holding = filteredHoldings[showReviewDialog];
+      setReviewStatus(holding.review?.status || "pending");
+      setReviewNotes(holding.review?.notes || "");
+    }
+  }, [showReviewDialog, filteredHoldings]);
+
+  if (showReviewDialog === null) return null;
+
+  const holding = filteredHoldings[showReviewDialog];
+
+  const handleSave = () => {
+    saveReviewFor(showReviewDialog, reviewStatus, reviewNotes);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50">
+      <div
+        className="absolute inset-0 bg-black/50"
+        onClick={() => setShowReviewDialog(null)}
+      />
+      <div className="absolute inset-0 grid place-items-center p-4">
+        <div className="w-full max-w-md bg-white rounded-lg border shadow-lg">
+          <div className="p-4 border-b flex items-center justify-between">
+            <h3 className="font-semibold text-lg">Review Company</h3>
+            <button
+              onClick={() => setShowReviewDialog(null)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="p-4 space-y-4">
+            <div>
+              <h4 className="font-semibold text-gray-900">{holding.companyName}</h4>
+              <p className="text-sm text-gray-600">
+                ISIN: {holding.isinNumber}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Review Status</label>
+              <select
+                className="w-full border rounded p-2 text-sm"
+                value={reviewStatus}
+                onChange={(e) => setReviewStatus(e.target.value)}
+              >
+                {reviewStatusOptions.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Review Notes</label>
+              <textarea
+                className="w-full h-32 p-2 border rounded resize-none text-sm"
+                value={reviewNotes}
+                onChange={(e) => setReviewNotes(e.target.value)}
+                placeholder="Add your review notes here..."
+              />
+            </div>
+
+            {holding.review?.reviewedAt && (
+              <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
+                Last reviewed: {formatDateTime(holding.review.reviewedAt)} by {holding.review.reviewedBy}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                className="px-4 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50"
+                onClick={() => setShowReviewDialog(null)}
+                disabled={updating}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-300"
+                onClick={handleSave}
+                disabled={updating}
+              >
+                {updating ? "Saving..." : "Save Review"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function ClientProfileDetails() {
@@ -285,8 +395,11 @@ export default function ClientProfileDetails() {
             Print
           </button>
           <button
-            className="px-3 py-1.5 rounded border"
-            onClick={() => toast.info("Export coming soon")}
+            className="px-3 py-1.5 rounded border bg-green-50 text-green-700 hover:bg-green-100"
+            onClick={() => {
+              exportClientProfileToExcel(client);
+              toast.success("Profile exported to Excel");
+            }}
           >
             Export
           </button>
@@ -553,26 +666,21 @@ export default function ClientProfileDetails() {
                         </select>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <span className="text-xs px-2 py-0.5 rounded border">
+                          <span className={`text-xs px-2 py-1 rounded border font-medium capitalize
+        ${h.review?.status === 'approved' ? 'bg-green-100 text-green-800 border-green-200' : ''}
+        ${h.review?.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' : ''}
+        ${h.review?.status === 'rejected' ? 'bg-red-100 text-red-800 border-red-200' : ''}
+        ${h.review?.status === 'needs_attention' ? 'bg-orange-100 text-orange-800 border-orange-200' : ''}
+      `}>
                             {h.review?.status || "pending"}
                           </span>
                           {h.review?.notes && (
-                            <div className="relative">
-                              <button
-                                className="text-blue-600 text-xs underline"
-                                onMouseEnter={() => 
-                                  setShowNotesTooltip({ index, notes: h.review.notes })
-                                }
-                                onMouseLeave={() => setShowNotesTooltip(null)}
-                              >
-                                Notes
-                              </button>
-                              {showNotesTooltip?.index === index && (
-                                <div className="absolute z-10 left-0 top-full mt-1 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg">
-                                  {h.review.notes}
-                                </div>
-                              )}
-                            </div>
+                            <button
+                              className="text-blue-600 text-xs underline hover:text-blue-800"
+                              onClick={() => setShowReviewDialog(index)}
+                            >
+                              Notes
+                            </button>
                           )}
                         </div>
                       )}
@@ -1025,85 +1133,14 @@ export default function ClientProfileDetails() {
       )}
 
       {/* Review Dialog */}
-      {showReviewDialog !== null && (
-        <div className="fixed inset-0 z-50">
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setShowReviewDialog(null)}
-          />
-          <div className="absolute inset-0 grid place-items-center p-4">
-            <div className="w-full max-w-md bg-card text-foreground rounded-lg border shadow-md">
-              <div className="p-4 border-b">
-                <h3 className="font-semibold">Review Company</h3>
-              </div>
-              <div className="p-4 space-y-4">
-                {(() => {
-                  const idx = showReviewDialog;
-                  const holding = filteredHoldings[idx];
-                  const [reviewStatus, setReviewStatus] = useState(holding.review?.status || "pending");
-                  const [reviewNotes, setReviewNotes] = useState(holding.review?.notes || "");
-
-                  return (
-                    <>
-                      <div>
-                        <h4 className="font-semibold">{holding.companyName}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {holding.isinNumber}
-                        </p>
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-sm">Review Status</label>
-                        <select
-                          className="w-full border rounded p-2"
-                          value={reviewStatus}
-                          onChange={(e) => setReviewStatus(e.target.value)}
-                        >
-                          {reviewStatusOptions.map((o) => (
-                            <option key={o.value} value={o.value}>
-                              {o.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-sm">Review Notes</label>
-                        <textarea
-                          className="w-full h-24 p-2 border rounded resize-none"
-                          value={reviewNotes}
-                          onChange={(e) => setReviewNotes(e.target.value)}
-                        />
-                      </div>
-                      {holding.review?.reviewedAt && (
-                        <div className="text-xs text-muted-foreground">
-                          Last reviewed:{" "}
-                          {formatDateTime(holding.review.reviewedAt)} by{" "}
-                          {holding.review.reviewedBy}
-                        </div>
-                      )}
-                      <div className="flex justify-end gap-2 pt-2">
-                        <button
-                          className="px-3 py-1.5 rounded border"
-                          onClick={() => setShowReviewDialog(null)}
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          className="px-3 py-1.5 rounded border"
-                          onClick={() =>
-                            saveReviewFor(idx, reviewStatus, reviewNotes)
-                          }
-                        >
-                          {updating ? "Saving..." : "Save Review"}
-                        </button>
-                      </div>
-                    </>
-                  );
-                })()}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <ReviewDialog
+        showReviewDialog={showReviewDialog}
+        setShowReviewDialog={setShowReviewDialog}
+        filteredHoldings={filteredHoldings}
+        saveReviewFor={saveReviewFor}
+        updating={updating}
+        formatDateTime={formatDateTime}
+      />
     </div>
   );
 }

@@ -2,10 +2,11 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-// Remove the import of connectDB from here if we are not using it in this file
 import shareholderRoutes from "./routes/shareholderRoutes.js";
 import dmatRoutes from "./routes/dmatRoutes.js";
 import clientProfileRoutes from "./routes/clientProfileRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 export function createServer() {
   const app = express();
@@ -25,6 +26,8 @@ export function createServer() {
     next();
   };
 
+  app.use("/api/auth", authRoutes);
+  app.use("/api/users", ensureDB, userRoutes);
   app.use("/api/shareholders", shareholderRoutes);
   app.use("/api/dmat", ensureDB, dmatRoutes);
   app.use("/api/client-profiles", ensureDB, clientProfileRoutes);

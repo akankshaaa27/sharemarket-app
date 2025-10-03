@@ -1,0 +1,71 @@
+"Create a complete authentication and client management system with the following features:
+
+1. Authentication
+
+Login Screen: Form with Email/Username and Password. Include 'Forgot Password' link. Show error alerts for wrong credentials.
+
+Forgot Password: Send reset link/OTP by email. Allow secure password reset.
+
+New Client Registration: When a client is added, automatically:
+
+Create an entry in both Client table and User table.
+
+Generate fields: id, username, name, email, password (hashed), phone number, createdAt.
+
+Auto-generate username and password if not provided.
+
+Send email with login credentials (username, email, password).
+
+2. Roles & Permissions
+
+Client: Can log in, view/update their own profile, and change/reset their password.
+
+Employee: Can log in and view assigned clients only.
+
+Admin: Full system access. Can:
+
+View all users and clients.
+
+Edit details, reset passwords, assign/change roles.
+
+See all user passwords in plain text (unhashed) on an Admin-only User Management screen.
+
+3. Client Profile Details Page
+
+Show Profile ID (e.g., 68df4c4d7f10e0a3a70d5579).
+
+Add a Review Mode toggle (switch profile into read-only view).
+
+Add a Print button to print profile details.
+
+Add an Export button to download the profile’s full details in Excel format.
+
+4. All Clients List Page
+
+Show searchable, paginated client table.
+
+Include an Export All button to export all client profiles in Excel format.
+
+Each row should have actions: View, Edit, Delete, Export.
+
+5. Admin Dashboard
+
+Admin sees tables for Users and Clients.
+
+Admin can: Edit user/client details, reset passwords, assign roles.
+
+Admin can export all users and clients to Excel.
+
+Add a User Management section in the sidebar where Admin can see all users with plain-text passwords.
+
+6. UI & Security
+
+Use modern, responsive design with a left-hand sidebar navigation: Dashboard, Clients, Profiles, DMAT, Shareholders, User Management.
+
+Use rounded cards, soft shadows, and clean layout.
+
+Show notifications for success/error after login, registration, profile updates, export, or password reset.
+
+Store passwords securely (hashed) in the database, but allow Admin role to view the real plain password in their dashboard.
+
+Build this as a full authentication and client management system with role-based access control, client profiles, export/print features, and an Admin-only User Management section that shows real passwords."
