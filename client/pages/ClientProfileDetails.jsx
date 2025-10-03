@@ -56,6 +56,7 @@ export default function ClientProfileDetails() {
   const [editingIndex, setEditingIndex] = useState(null);
   const [editedHolding, setEditedHolding] = useState(null);
   const [showReviewDialog, setShowReviewDialog] = useState(null); // number | null
+  const [showNotesTooltip, setShowNotesTooltip] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -556,12 +557,20 @@ export default function ClientProfileDetails() {
                             {h.review?.status || "pending"}
                           </span>
                           {h.review?.notes && (
-                            <button
-                              className="text-blue-600 text-xs underline"
-                              onClick={() => toast.info(h.review?.notes)}
-                            >
-                              Notes
-                            </button>
+                            <div className="relative">
+                              <button
+                                className="text-blue-600 text-xs underline"
+                                onMouseEnter={() => setShowNotesTooltip({ index, notes: h.review.notes })}
+                                onMouseLeave={() => setShowNotesTooltip(null)}
+                              >
+                                Notes
+                              </button>
+                              {showNotesTooltip?.index === index && (
+                                <div className="absolute z-10 left-0 top-full mt-1 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg">
+                                  {h.review.notes}
+                                </div>
+                              )}
+                            </div>
                           )}
                         </div>
                       )}

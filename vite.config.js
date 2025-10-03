@@ -1,21 +1,16 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { createServer as createApiServer } from "./server/index.js";
-
-function expressDevMiddleware() {
-  return {
-    name: "express-dev-middleware",
-    configureServer(vite) {
-      const app = createApiServer();
-      vite.middlewares.use(app);
-    },
-  };
-}
 
 export default defineConfig({
-  plugins: [react(), expressDevMiddleware()],
-  server: { port: 5173, host: true },
+  plugins: [react()],
+  server: {
+    port: 5173,
+    host: true,
+    proxy: {
+      "/api": "http://localhost:5000", // forward API calls to backend
+    },
+  },
   build: { outDir: "dist/spa" },
   resolve: {
     alias: {
