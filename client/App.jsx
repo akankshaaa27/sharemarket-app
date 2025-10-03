@@ -9,47 +9,48 @@ import NotFound from "./pages/NotFound.jsx";
 
 function Layout({ children }) {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b bg-card">
-        <div className="container flex items-center justify-between py-4">
-          <h1 className="text-xl font-semibold">ShareMarket Manager Pro</h1>
-          <nav className="flex gap-4 text-sm">
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                `hover:underline ${isActive ? "text-primary" : ""}`
-              }
-            >
-              Dashboard
-            </NavLink>
-            <NavLink
-              to="/shareholders"
-              className={({ isActive }) =>
-                `hover:underline ${isActive ? "text-primary" : ""}`
-              }
-            >
-              Shareholders
-            </NavLink>
-            <NavLink
-              to="/dmat"
-              className={({ isActive }) =>
-                `hover:underline ${isActive ? "text-primary" : ""}`
-              }
-            >
-              DMAT
-            </NavLink>
-            <NavLink
-              to="/profiles"
-              className={({ isActive }) =>
-                `hover:underline ${isActive ? "text-primary" : ""}`
-              }
-            >
-              Profiles
-            </NavLink>
-          </nav>
-        </div>
-      </header>
-      <main className="container py-6">{children}</main>
+    <div className="flex min-h-screen bg-background text-foreground">
+      {/* Sidebar */}
+      <aside className="w-64 border-r bg-card p-6">
+        <h1 className="text-lg font-bold mb-6">ShareMarket Manager Pro</h1>
+        <nav className="flex flex-col gap-4 text-sm">
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              `hover:underline ${isActive ? "text-primary font-semibold" : ""}`
+            }
+          >
+            Dashboard
+          </NavLink>
+          <NavLink
+            to="/profiles"
+            className={({ isActive }) =>
+              `hover:underline ${isActive ? "text-primary font-semibold" : ""}`
+            }
+          >
+            Profiles
+          </NavLink>
+          <NavLink
+            to="/shareholders"
+            className={({ isActive }) =>
+              `hover:underline ${isActive ? "text-primary font-semibold" : ""}`
+            }
+          >
+            Shareholders
+          </NavLink>
+          <NavLink
+            to="/dmat"
+            className={({ isActive }) =>
+              `hover:underline ${isActive ? "text-primary font-semibold" : ""}`
+            }
+          >
+            DMAT
+          </NavLink>
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 p-6">{children}</main>
     </div>
   );
 }
@@ -59,10 +60,10 @@ export default function App() {
     <Layout>
       <Routes>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/shareholders" element={<Shareholders />} />
-        <Route path="/dmat" element={<DmatAccounts />} />
         <Route path="/profiles" element={<ClientProfiles />} />
         <Route path="/client-profiles/:id" element={<ClientProfileDetails />} />
+        <Route path="/shareholders" element={<Shareholders />} />
+        <Route path="/dmat" element={<DmatAccounts />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Layout>
