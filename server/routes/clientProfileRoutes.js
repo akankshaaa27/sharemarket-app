@@ -5,34 +5,46 @@ const router = express.Router();
 
 // GET all (with search + pagination)
 router.get("/", async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = Math.min(parseInt(req.query.limit) || 20, 100);
-  const skip = (page - 1) * limit;
-  const q = (req.query.q || "").trim();
+  try {
+    const pageNum = parseInt(req.query.page, 10);
+    const limitNum = parseInt(req.query.limit, 10);
+    const page = Number.isFinite(pageNum) && pageNum > 0 ? pageNum : 1;
+    const limit = Math.min(Number.isFinite(limitNum) && limitNum > 0 ? limitNum : 20, 100);
+    const skip = (page - 1) * limit;
+    const q = (req.query.q || "").toString().trim();
 
-  const filter = q
-    ? {
-        $or: [
-          { "shareholderName.name1": { $regex: q, $options: "i" } },
-          { panNumber: { $regex: q, $options: "i" } },
-          { "companies.companyName": { $regex: q, $options: "i" } },
-        ],
-      }
-    : {};
+    const filter = q
+      ? {
+          $or: [
+            { "shareholderName.name1": { $regex: q, $options: "i" } },
+            { panNumber: { $regex: q, $options: "i" } },
+            { "companies.companyName": { $regex: q, $options: "i" } },
+          ],
+        }
+      : {};
 
-  const [items, total] = await Promise.all([
-    ClientProfile.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
-    ClientProfile.countDocuments(filter),
-  ]);
+    const [items, total] = await Promise.all([
+      ClientProfile.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      ClientProfile.countDocuments(filter),
+    ]);
 
-  res.json({ data: items, page, limit, total });
+    res.json({ data: items, page, limit, total });
+  } catch (e) {
+    console.error("GET /client-profiles error:", e);
+    res.status(500).json({ error: e.message || "Internal Server Error" });
+  }
 });
 
 // GET by ID
 router.get("/:id", async (req, res) => {
-  const item = await ClientProfile.findById(req.params.id);
-  if (!item) return res.status(404).json({ error: "Not found" });
-  res.json(item);
+  try {
+    const item = await ClientProfile.findById(req.params.id);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
+  } catch (e) {
+    console.error("GET /client-profiles/:id error:", e);
+    res.status(500).json({ error: e.message || "Internal Server Error" });
+  }
 });
 
 // POST create
