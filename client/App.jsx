@@ -59,7 +59,9 @@ function Layout({ children }) {
                 to={link.to}
                 className={({ isActive }) =>
                   `px-3 py-2 rounded-md transition-colors hover:bg-accent ${
-                    isActive ? "bg-accent text-foreground" : "text-muted-foreground"
+                    isActive
+                      ? "bg-accent text-foreground"
+                      : "text-muted-foreground"
                   }`
                 }
               >
@@ -89,7 +91,10 @@ function Layout({ children }) {
         {/* Mobile sidebar drawer */}
         {open && (
           <div className="md:hidden fixed inset-0 z-30">
-            <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
+            <div
+              className="absolute inset-0 bg-black/40"
+              onClick={() => setOpen(false)}
+            />
             <div
               id="mobile-sidebar"
               className="absolute left-0 top-0 h-full w-64 border-r bg-card p-4 shadow-xl"
@@ -107,7 +112,9 @@ function Layout({ children }) {
                     onClick={() => setOpen(false)}
                     className={({ isActive }) =>
                       `px-3 py-2 rounded-md transition-colors hover:bg-accent ${
-                        isActive ? "bg-accent text-foreground" : "text-muted-foreground"
+                        isActive
+                          ? "bg-accent text-foreground"
+                          : "text-muted-foreground"
                       }`
                     }
                   >
@@ -121,9 +128,7 @@ function Layout({ children }) {
 
         {/* Main Content */}
         <main className="flex-1 p-4 md:p-6">
-          <div className="mx-auto max-w-7xl">
-            {children}
-          </div>
+          <div className="mx-auto max-w-7xl">{children}</div>
         </main>
       </div>
     </div>

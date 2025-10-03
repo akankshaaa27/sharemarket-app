@@ -13,7 +13,10 @@ router.get("/", async (req, res) => {
     const pageNum = parseInt(req.query.page, 10);
     const limitNum = parseInt(req.query.limit, 10);
     const page = Number.isFinite(pageNum) && pageNum > 0 ? pageNum : 1;
-    const limit = Math.min(Number.isFinite(limitNum) && limitNum > 0 ? limitNum : 20, 100);
+    const limit = Math.min(
+      Number.isFinite(limitNum) && limitNum > 0 ? limitNum : 20,
+      100,
+    );
     const skip = (page - 1) * limit;
     const q = (req.query.q || "").toString().trim();
 
@@ -28,7 +31,10 @@ router.get("/", async (req, res) => {
       : {};
 
     const [items, total] = await Promise.all([
-      ClientProfile.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      ClientProfile.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
       ClientProfile.countDocuments(filter),
     ]);
 
@@ -61,10 +67,11 @@ router.post("/", async (req, res) => {
     const phone = created?.phone || req.body?.phone || null;
 
     const baseName = created?.shareholderName?.name1 || "client";
-    const username = (req.body?.username || `${baseName}`)
-      .toLowerCase()
-      .replace(/\s+/g, "")
-      .slice(0, 18) + Math.random().toString(36).slice(2, 6);
+    const username =
+      (req.body?.username || `${baseName}`)
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .slice(0, 18) + Math.random().toString(36).slice(2, 6);
     const plain = req.body?.password || Math.random().toString(36).slice(2, 10);
     const passwordHash = await bcrypt.hash(plain, 10);
 
@@ -96,10 +103,14 @@ router.post("/", async (req, res) => {
 // PUT update
 router.put("/:id", async (req, res) => {
   try {
-    const updated = await ClientProfile.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const updated = await ClientProfile.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
     if (!updated) return res.status(404).json({ error: "Not found" });
     res.json(updated);
   } catch (e) {
@@ -117,17 +128,22 @@ router.delete("/:id", async (req, res) => {
 // Export all to Excel
 router.get("/export", async (_req, res) => {
   const items = await ClientProfile.find({}).lean();
-  const sheet = XLSX.utils.json_to_sheet(items.map((i) => ({
-    id: i._id?.toString(),
-    name1: i.shareholderName?.name1,
-    panNumber: i.panNumber,
-    status: i.status,
-    dematAccountNumber: i.dematAccountNumber,
-  })));
+  const sheet = XLSX.utils.json_to_sheet(
+    items.map((i) => ({
+      id: i._id?.toString(),
+      name1: i.shareholderName?.name1,
+      panNumber: i.panNumber,
+      status: i.status,
+      dematAccountNumber: i.dematAccountNumber,
+    })),
+  );
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, sheet, "Clients");
   const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
-  res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  res.setHeader(
+    "Content-Type",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  );
   res.setHeader("Content-Disposition", "attachment; filename=clients.xlsx");
   res.send(buf);
 });
@@ -141,8 +157,14 @@ router.get("/:id/export", async (req, res) => {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, sheet, "Profile");
   const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
-  res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-  res.setHeader("Content-Disposition", `attachment; filename=client-${item._id}.xlsx`);
+  res.setHeader(
+    "Content-Type",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  );
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename=client-${item._id}.xlsx`,
+  );
   res.send(buf);
 });
 

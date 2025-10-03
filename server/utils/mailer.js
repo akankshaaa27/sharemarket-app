@@ -21,6 +21,12 @@ export async function sendMail({ to, subject, text, html }) {
     console.log("[MAIL:FAKE]", { to, subject, text });
     return { ok: true, simulated: true };
   }
-  const info = await transporter.sendMail({ from: SMTP_FROM, to, subject, text, html });
+  const info = await transporter.sendMail({
+    from: SMTP_FROM,
+    to,
+    subject,
+    text,
+    html,
+  });
   return { ok: true, messageId: info.messageId };
 }

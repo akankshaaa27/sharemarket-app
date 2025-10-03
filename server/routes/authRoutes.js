@@ -14,7 +14,16 @@ router.post("/login", async (req, res) => {
   const ok = await bcrypt.compare(password || "", user.passwordHash);
   if (!ok) return res.status(400).json({ error: "Invalid credentials" });
   const token = issueToken(user);
-  res.json({ token, user: { id: user._id, username: user.username, role: user.role, name: user.name, email: user.email } });
+  res.json({
+    token,
+    user: {
+      id: user._id,
+      username: user.username,
+      role: user.role,
+      name: user.name,
+      email: user.email,
+    },
+  });
 });
 
 router.post("/forgot", async (req, res) => {
@@ -45,7 +54,13 @@ router.post("/reset", auth, async (req, res) => {
 
 router.get("/me", auth, async (req, res) => {
   const u = req.user;
-  res.json({ id: u._id, username: u.username, role: u.role, name: u.name, email: u.email });
+  res.json({
+    id: u._id,
+    username: u.username,
+    role: u.role,
+    name: u.name,
+    email: u.email,
+  });
 });
 
 export default router;

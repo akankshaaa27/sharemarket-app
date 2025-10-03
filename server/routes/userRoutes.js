@@ -8,13 +8,22 @@ const router = express.Router();
 router.use(auth, requireRole("admin"));
 
 router.get("/", async (_req, res) => {
-  const users = await User.find({}).select("username name email phone role createdAt passwordPlain");
+  const users = await User.find({}).select(
+    "username name email phone role createdAt passwordPlain",
+  );
   res.json({ data: users });
 });
 
 router.put("/:id", async (req, res) => {
-  const updates = (({ name, email, phone, role }) => ({ name, email, phone, role }))(req.body || {});
-  const user = await User.findByIdAndUpdate(req.params.id, updates, { new: true });
+  const updates = (({ name, email, phone, role }) => ({
+    name,
+    email,
+    phone,
+    role,
+  }))(req.body || {});
+  const user = await User.findByIdAndUpdate(req.params.id, updates, {
+    new: true,
+  });
   if (!user) return res.status(404).json({ error: "Not found" });
   res.json(user);
 });
@@ -26,7 +35,7 @@ router.post("/:id/reset-password", async (req, res) => {
   const user = await User.findByIdAndUpdate(
     req.params.id,
     { passwordHash: hash, passwordPlain: password },
-    { new: true }
+    { new: true },
   );
   if (!user) return res.status(404).json({ error: "Not found" });
   res.json({ success: true });

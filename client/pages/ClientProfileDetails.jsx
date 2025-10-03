@@ -560,7 +560,12 @@ export default function ClientProfileDetails() {
                             <div className="relative">
                               <button
                                 className="text-blue-600 text-xs underline"
-                                onMouseEnter={() => setShowNotesTooltip({ index, notes: h.review.notes })}
+                                onMouseEnter={() =>
+                                  setShowNotesTooltip({
+                                    index,
+                                    notes: h.review.notes,
+                                  })
+                                }
                                 onMouseLeave={() => setShowNotesTooltip(null)}
                               >
                                 Notes
