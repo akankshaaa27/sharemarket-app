@@ -77,26 +77,46 @@ export default function ClientProfileDetails() {
 
   const filteredHoldings = useMemo(() => {
     if (reviewFilter === "all") return shareHoldings;
-    return shareHoldings.filter((h) => (h.review?.status || "pending") === reviewFilter);
+    return shareHoldings.filter(
+      (h) => (h.review?.status || "pending") === reviewFilter,
+    );
   }, [shareHoldings, reviewFilter]);
 
-  const reviewStats = useMemo(() => ({
-    total: shareHoldings.length,
-    pending: shareHoldings.filter((h) => h.review?.status === "pending").length,
-    approved: shareHoldings.filter((h) => h.review?.status === "approved").length,
-    rejected: shareHoldings.filter((h) => h.review?.status === "rejected").length,
-    needs_attention: shareHoldings.filter((h) => h.review?.status === "needs_attention").length,
-  }), [shareHoldings]);
+  const reviewStats = useMemo(
+    () => ({
+      total: shareHoldings.length,
+      pending: shareHoldings.filter((h) => h.review?.status === "pending")
+        .length,
+      approved: shareHoldings.filter((h) => h.review?.status === "approved")
+        .length,
+      rejected: shareHoldings.filter((h) => h.review?.status === "rejected")
+        .length,
+      needs_attention: shareHoldings.filter(
+        (h) => h.review?.status === "needs_attention",
+      ).length,
+    }),
+    [shareHoldings],
+  );
 
-  const totalShares = useMemo(() => shareHoldings.reduce((s, h) => s + (h.quantity || 0), 0), [shareHoldings]);
+  const totalShares = useMemo(
+    () => shareHoldings.reduce((s, h) => s + (h.quantity || 0), 0),
+    [shareHoldings],
+  );
   const totalInvestment = useMemo(
-    () => shareHoldings.reduce((s, h) => s + (h.quantity || 0) * (h.faceValue || 0), 0),
+    () =>
+      shareHoldings.reduce(
+        (s, h) => s + (h.quantity || 0) * (h.faceValue || 0),
+        0,
+      ),
     [shareHoldings],
   );
 
   function formatCurrency(v) {
     if (v === undefined || v === null) return "—";
-    return Number(v).toLocaleString("en-IN", { style: "currency", currency: "INR" });
+    return Number(v).toLocaleString("en-IN", {
+      style: "currency",
+      currency: "INR",
+    });
   }
   function formatNumber(v) {
     if (v === undefined || v === null) return "—";
@@ -237,10 +257,17 @@ export default function ClientProfileDetails() {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/profiles")} className="px-3 py-1.5 border rounded">Back</button>
+          <button
+            onClick={() => navigate("/profiles")}
+            className="px-3 py-1.5 border rounded"
+          >
+            Back
+          </button>
           <div>
             <h1 className="text-2xl font-bold">Client Profile Details</h1>
-            <p className="text-sm text-muted-foreground">Profile ID: {client._id}</p>
+            <p className="text-sm text-muted-foreground">
+              Profile ID: {client._id}
+            </p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -250,24 +277,45 @@ export default function ClientProfileDetails() {
           >
             {reviewMode ? "Exit Review" : "Review Mode"}
           </button>
-          <button className="px-3 py-1.5 rounded border" onClick={() => window.print()}>Print</button>
-          <button className="px-3 py-1.5 rounded border" onClick={() => toast.info("Export coming soon")}>Export</button>
-          <button className="px-3 py-1.5 rounded border text-red-600" onClick={onDeleteProfile}>Delete</button>
+          <button
+            className="px-3 py-1.5 rounded border"
+            onClick={() => window.print()}
+          >
+            Print
+          </button>
+          <button
+            className="px-3 py-1.5 rounded border"
+            onClick={() => toast.info("Export coming soon")}
+          >
+            Export
+          </button>
+          <button
+            className="px-3 py-1.5 rounded border text-red-600"
+            onClick={onDeleteProfile}
+          >
+            Delete
+          </button>
         </div>
       </div>
 
       {updating && (
-        <div className="bg-blue-50 border border-blue-200 rounded p-3 text-blue-800">Updating client profile...</div>
+        <div className="bg-blue-50 border border-blue-200 rounded p-3 text-blue-800">
+          Updating client profile...
+        </div>
       )}
 
       {reviewMode && (
         <div className="bg-blue-50 border border-blue-200 rounded p-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-blue-800 font-semibold">Review Mode Active • Manage company reviews and status</div>
+          <div className="flex items-center gap-2 text-blue-800 font-semibold">
+            Review Mode Active • Manage company reviews and status
+          </div>
           <div className="flex gap-4 text-sm">
             {Object.entries(reviewStats).map(([k, v]) => (
               <div key={k} className="text-center">
                 <div className="font-semibold">{v}</div>
-                <div className="text-xs capitalize text-muted-foreground">{k}</div>
+                <div className="text-xs capitalize text-muted-foreground">
+                  {k}
+                </div>
               </div>
             ))}
           </div>
@@ -278,40 +326,64 @@ export default function ClientProfileDetails() {
       <div className="rounded border p-4 bg-card">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold">Basic Information</h2>
-          <span className="px-2 py-0.5 rounded text-xs border">{client.status}</span>
+          <span className="px-2 py-0.5 rounded text-xs border">
+            {client.status}
+          </span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <div className="text-xs text-muted-foreground">Shareholder Name</div>
+            <div className="text-xs text-muted-foreground">
+              Shareholder Name
+            </div>
             <div className="font-semibold">
               {val(client.shareholderName?.name1)}
-              {client.shareholderName?.name2 && `, ${client.shareholderName.name2}`}
-              {client.shareholderName?.name3 && `, ${client.shareholderName.name3}`}
+              {client.shareholderName?.name2 &&
+                `, ${client.shareholderName.name2}`}
+              {client.shareholderName?.name3 &&
+                `, ${client.shareholderName.name3}`}
             </div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground">PAN Number</div>
-            <div className="font-mono font-semibold">{val(client.panNumber)}</div>
+            <div className="font-mono font-semibold">
+              {val(client.panNumber)}
+            </div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground">Aadhaar Number</div>
-            <div className="font-mono font-semibold">{val(client.aadhaarNumber)}</div>
+            <div className="font-mono font-semibold">
+              {val(client.aadhaarNumber)}
+            </div>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">Demat Account Number</div>
-            <div className="font-semibold">{val(client.dematAccountNumber)}</div>
+            <div className="text-xs text-muted-foreground">
+              Demat Account Number
+            </div>
+            <div className="font-semibold">
+              {val(client.dematAccountNumber)}
+            </div>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">Demat Account Created With</div>
+            <div className="text-xs text-muted-foreground">
+              Demat Account Created With
+            </div>
             <div className="font-semibold">{val(client.dematCreatedWith)}</div>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">DMAT Account Created By (Person)</div>
-            <div className="font-semibold">{val(client.dematCreatedWithPerson)}</div>
+            <div className="text-xs text-muted-foreground">
+              DMAT Account Created By (Person)
+            </div>
+            <div className="font-semibold">
+              {val(client.dematCreatedWithPerson)}
+            </div>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">Creator Contact Number</div>
-            <div className="font-semibold">{val(client.dematCreatedWithPersonNumber)}</div>
+            <div className="text-xs text-muted-foreground">
+              Creator Contact Number
+            </div>
+            <div className="font-semibold">
+              {val(client.dematCreatedWithPersonNumber)}
+            </div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground">Current Date</div>
@@ -330,11 +402,15 @@ export default function ClientProfileDetails() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
             <div className="text-xs text-muted-foreground">Bank Name</div>
-            <div className="font-semibold">{val(client.bankDetails?.bankName)}</div>
+            <div className="font-semibold">
+              {val(client.bankDetails?.bankName)}
+            </div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground">Account Number</div>
-            <div className="font-mono">{val(client.bankDetails?.bankNumber)}</div>
+            <div className="font-mono">
+              {val(client.bankDetails?.bankNumber)}
+            </div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground">Branch</div>
@@ -342,7 +418,9 @@ export default function ClientProfileDetails() {
           </div>
           <div>
             <div className="text-xs text-muted-foreground">IFSC Code</div>
-            <div className="font-mono font-semibold">{val(client.bankDetails?.ifscCode)}</div>
+            <div className="font-mono font-semibold">
+              {val(client.bankDetails?.ifscCode)}
+            </div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground">MICR Code</div>
@@ -355,14 +433,20 @@ export default function ClientProfileDetails() {
       <div className="rounded border p-4 bg-card">
         <div className="flex items-center justify-between mb-2">
           <h2 className="font-semibold">Share Holdings Summary</h2>
-          <button className="px-3 py-1.5 rounded border" onClick={() => setShowAddCompany(true)} disabled={updating}>
+          <button
+            className="px-3 py-1.5 rounded border"
+            onClick={() => setShowAddCompany(true)}
+            disabled={updating}
+          >
             Add Company
           </button>
         </div>
         <div className="flex gap-4 text-sm text-muted-foreground">
           <span>Total Companies: {shareHoldings.length}</span>
           <span>Total Shares: {formatNumber(totalShares)}</span>
-          <span className="font-semibold">Total Investment: {formatCurrency(totalInvestment)}</span>
+          <span className="font-semibold">
+            Total Investment: {formatCurrency(totalInvestment)}
+          </span>
         </div>
 
         <div className="flex items-center gap-3 mt-4">
@@ -374,10 +458,14 @@ export default function ClientProfileDetails() {
           >
             <option value="all">All Companies</option>
             {reviewStatusOptions.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
             ))}
           </select>
-          <span className="px-2 py-0.5 rounded border text-xs">Showing {filteredHoldings.length} of {shareHoldings.length}</span>
+          <span className="px-2 py-0.5 rounded border text-xs">
+            Showing {filteredHoldings.length} of {shareHoldings.length}
+          </span>
         </div>
 
         <div className="overflow-x-auto mt-4">
@@ -409,66 +497,158 @@ export default function ClientProfileDetails() {
                     <td className="p-2 align-top">{index + 1}</td>
                     <td className="p-2 align-top">
                       {isEditing ? (
-                        <input className="w-full border rounded p-1" value={editedHolding?.companyName || ""} onChange={(e) => setEditedHolding((p) => ({ ...(p || {}), companyName: e.target.value }))} />
+                        <input
+                          className="w-full border rounded p-1"
+                          value={editedHolding?.companyName || ""}
+                          onChange={(e) =>
+                            setEditedHolding((p) => ({
+                              ...(p || {}),
+                              companyName: e.target.value,
+                            }))
+                          }
+                        />
                       ) : (
-                        <span className="font-semibold">{val(h.companyName)}</span>
+                        <span className="font-semibold">
+                          {val(h.companyName)}
+                        </span>
                       )}
                     </td>
                     <td className="p-2 align-top">
                       {isEditing ? (
-                        <input className="w-full border rounded p-1" value={editedHolding?.isinNumber || ""} onChange={(e) => setEditedHolding((p) => ({ ...(p || {}), isinNumber: e.target.value }))} />
+                        <input
+                          className="w-full border rounded p-1"
+                          value={editedHolding?.isinNumber || ""}
+                          onChange={(e) =>
+                            setEditedHolding((p) => ({
+                              ...(p || {}),
+                              isinNumber: e.target.value,
+                            }))
+                          }
+                        />
                       ) : (
                         <span className="font-mono">{val(h.isinNumber)}</span>
                       )}
                     </td>
                     <td className="p-2 align-top">
                       {isEditing ? (
-                        <select className="w-full border rounded p-1" value={editedHolding?.review?.status || "pending"} onChange={(e) => setEditedHolding((p) => ({ ...(p || {}), review: { ...((p && p.review) || {}), status: e.target.value } }))}>
+                        <select
+                          className="w-full border rounded p-1"
+                          value={editedHolding?.review?.status || "pending"}
+                          onChange={(e) =>
+                            setEditedHolding((p) => ({
+                              ...(p || {}),
+                              review: {
+                                ...((p && p.review) || {}),
+                                status: e.target.value,
+                              },
+                            }))
+                          }
+                        >
                           {reviewStatusOptions.map((o) => (
-                            <option key={o.value} value={o.value}>{o.label}</option>
+                            <option key={o.value} value={o.value}>
+                              {o.label}
+                            </option>
                           ))}
                         </select>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <span className="text-xs px-2 py-0.5 rounded border">{h.review?.status || "pending"}</span>
+                          <span className="text-xs px-2 py-0.5 rounded border">
+                            {h.review?.status || "pending"}
+                          </span>
                           {h.review?.notes && (
-                            <button className="text-blue-600 text-xs underline" onClick={() => toast.info(h.review?.notes)}>Notes</button>
+                            <button
+                              className="text-blue-600 text-xs underline"
+                              onClick={() => toast.info(h.review?.notes)}
+                            >
+                              Notes
+                            </button>
                           )}
                         </div>
                       )}
                     </td>
                     <td className="p-2 align-top">
                       {isEditing ? (
-                        <input className="w-full border rounded p-1" value={editedHolding?.folioNumber || ""} onChange={(e) => setEditedHolding((p) => ({ ...(p || {}), folioNumber: e.target.value }))} />
+                        <input
+                          className="w-full border rounded p-1"
+                          value={editedHolding?.folioNumber || ""}
+                          onChange={(e) =>
+                            setEditedHolding((p) => ({
+                              ...(p || {}),
+                              folioNumber: e.target.value,
+                            }))
+                          }
+                        />
                       ) : (
                         val(h.folioNumber)
                       )}
                     </td>
                     <td className="p-2 align-top">
                       {isEditing ? (
-                        <input className="w-full border rounded p-1" value={editedHolding?.certificateNumber || ""} onChange={(e) => setEditedHolding((p) => ({ ...(p || {}), certificateNumber: e.target.value }))} />
+                        <input
+                          className="w-full border rounded p-1"
+                          value={editedHolding?.certificateNumber || ""}
+                          onChange={(e) =>
+                            setEditedHolding((p) => ({
+                              ...(p || {}),
+                              certificateNumber: e.target.value,
+                            }))
+                          }
+                        />
                       ) : (
                         val(h.certificateNumber)
                       )}
                     </td>
                     <td className="p-2 align-top text-right">
                       {isEditing ? (
-                        <input type="number" className="w-full border rounded p-1 text-right" value={editedHolding?.quantity ?? 0} onChange={(e) => setEditedHolding((p) => ({ ...(p || {}), quantity: Number(e.target.value) || 0 }))} />
+                        <input
+                          type="number"
+                          className="w-full border rounded p-1 text-right"
+                          value={editedHolding?.quantity ?? 0}
+                          onChange={(e) =>
+                            setEditedHolding((p) => ({
+                              ...(p || {}),
+                              quantity: Number(e.target.value) || 0,
+                            }))
+                          }
+                        />
                       ) : (
                         formatNumber(quantity)
                       )}
                     </td>
                     <td className="p-2 align-top text-right">
                       {isEditing ? (
-                        <input type="number" step="0.01" className="w-full border rounded p-1 text-right" value={editedHolding?.faceValue ?? 0} onChange={(e) => setEditedHolding((p) => ({ ...(p || {}), faceValue: Number(e.target.value) || 0 }))} />
+                        <input
+                          type="number"
+                          step="0.01"
+                          className="w-full border rounded p-1 text-right"
+                          value={editedHolding?.faceValue ?? 0}
+                          onChange={(e) =>
+                            setEditedHolding((p) => ({
+                              ...(p || {}),
+                              faceValue: Number(e.target.value) || 0,
+                            }))
+                          }
+                        />
                       ) : (
                         formatCurrency(faceValue)
                       )}
                     </td>
-                    <td className="p-2 align-top text-right font-semibold">{formatCurrency(totalValue)}</td>
+                    <td className="p-2 align-top text-right font-semibold">
+                      {formatCurrency(totalValue)}
+                    </td>
                     <td className="p-2 align-top">
                       {isEditing ? (
-                        <input type="date" className="w-full border rounded p-1" value={editedHolding?.purchaseDate || ""} onChange={(e) => setEditedHolding((p) => ({ ...(p || {}), purchaseDate: e.target.value }))} />
+                        <input
+                          type="date"
+                          className="w-full border rounded p-1"
+                          value={editedHolding?.purchaseDate || ""}
+                          onChange={(e) =>
+                            setEditedHolding((p) => ({
+                              ...(p || {}),
+                              purchaseDate: e.target.value,
+                            }))
+                          }
+                        />
                       ) : (
                         formatDate(h.purchaseDate)
                       )}
@@ -476,11 +656,41 @@ export default function ClientProfileDetails() {
                     <td className="p-2 align-top">
                       {isEditing ? (
                         <div className="space-y-1">
-                          <input className="w-full border rounded p-1" value={editedHolding?.distinctiveNumber?.from || ""} onChange={(e) => setEditedHolding((p) => ({ ...(p || {}), distinctiveNumber: { ...((p && p.distinctiveNumber) || {}), from: e.target.value } }))} placeholder="From" />
-                          <input className="w-full border rounded p-1" value={editedHolding?.distinctiveNumber?.to || ""} onChange={(e) => setEditedHolding((p) => ({ ...(p || {}), distinctiveNumber: { ...((p && p.distinctiveNumber) || {}), to: e.target.value } }))} placeholder="To" />
+                          <input
+                            className="w-full border rounded p-1"
+                            value={editedHolding?.distinctiveNumber?.from || ""}
+                            onChange={(e) =>
+                              setEditedHolding((p) => ({
+                                ...(p || {}),
+                                distinctiveNumber: {
+                                  ...((p && p.distinctiveNumber) || {}),
+                                  from: e.target.value,
+                                },
+                              }))
+                            }
+                            placeholder="From"
+                          />
+                          <input
+                            className="w-full border rounded p-1"
+                            value={editedHolding?.distinctiveNumber?.to || ""}
+                            onChange={(e) =>
+                              setEditedHolding((p) => ({
+                                ...(p || {}),
+                                distinctiveNumber: {
+                                  ...((p && p.distinctiveNumber) || {}),
+                                  to: e.target.value,
+                                },
+                              }))
+                            }
+                            placeholder="To"
+                          />
                         </div>
-                      ) : h.distinctiveNumber?.from || h.distinctiveNumber?.to ? (
-                        <span className="font-mono">{val(h.distinctiveNumber?.from, "—")} to {val(h.distinctiveNumber?.to, "—")}</span>
+                      ) : h.distinctiveNumber?.from ||
+                        h.distinctiveNumber?.to ? (
+                        <span className="font-mono">
+                          {val(h.distinctiveNumber?.from, "—")} to{" "}
+                          {val(h.distinctiveNumber?.to, "—")}
+                        </span>
                       ) : (
                         "—"
                       )}
@@ -488,14 +698,43 @@ export default function ClientProfileDetails() {
                     <td className="p-2 align-top">
                       {isEditing ? (
                         <div className="flex gap-2">
-                          <button className="px-2 py-1 rounded border" onClick={saveEdit} disabled={updating}>Save</button>
-                          <button className="px-2 py-1 rounded border" onClick={cancelEdit}>Cancel</button>
+                          <button
+                            className="px-2 py-1 rounded border"
+                            onClick={saveEdit}
+                            disabled={updating}
+                          >
+                            Save
+                          </button>
+                          <button
+                            className="px-2 py-1 rounded border"
+                            onClick={cancelEdit}
+                          >
+                            Cancel
+                          </button>
                         </div>
                       ) : (
                         <div className="flex gap-2">
-                          <button className="px-2 py-1 rounded border" title="Review" onClick={() => setShowReviewDialog(index)}>Review</button>
-                          <button className="px-2 py-1 rounded border" onClick={() => beginEdit(index)} disabled={updating}>Edit</button>
-                          <button className="px-2 py-1 rounded border text-red-600" onClick={() => deleteCompany(index)} disabled={updating || shareHoldings.length === 1}>Delete</button>
+                          <button
+                            className="px-2 py-1 rounded border"
+                            title="Review"
+                            onClick={() => setShowReviewDialog(index)}
+                          >
+                            Review
+                          </button>
+                          <button
+                            className="px-2 py-1 rounded border"
+                            onClick={() => beginEdit(index)}
+                            disabled={updating}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="px-2 py-1 rounded border text-red-600"
+                            onClick={() => deleteCompany(index)}
+                            disabled={updating || shareHoldings.length === 1}
+                          >
+                            Delete
+                          </button>
                         </div>
                       )}
                     </td>
@@ -507,7 +746,9 @@ export default function ClientProfileDetails() {
 
           {filteredHoldings.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
-              {shareHoldings.length === 0 ? "No share holdings found for this client. Click 'Add Company' to get started." : "No companies match the current filter criteria."}
+              {shareHoldings.length === 0
+                ? "No share holdings found for this client. Click 'Add Company' to get started."
+                : "No companies match the current filter criteria."}
             </div>
           )}
         </div>
@@ -519,14 +760,20 @@ export default function ClientProfileDetails() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <div className="text-xs text-muted-foreground">Remarks</div>
-            <div className="p-3 border rounded bg-muted/20 min-h-[80px]">{val(client.remarks, "No remarks provided")}</div>
+            <div className="p-3 border rounded bg-muted/20 min-h-[80px]">
+              {val(client.remarks, "No remarks provided")}
+            </div>
           </div>
           <div className="space-y-2">
-            <div className="text-xs text-muted-foreground">Dividend Information</div>
+            <div className="text-xs text-muted-foreground">
+              Dividend Information
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <div className="text-xs text-muted-foreground">Amount</div>
-                <div className="font-semibold">{formatCurrency(client.dividend?.amount)}</div>
+                <div className="font-semibold">
+                  {formatCurrency(client.dividend?.amount)}
+                </div>
               </div>
               <div>
                 <div className="text-xs text-muted-foreground">Date</div>
@@ -538,10 +785,18 @@ export default function ClientProfileDetails() {
       </div>
 
       <div className="flex justify-end gap-3 pt-6 border-t">
-        <button className="px-3 py-1.5 rounded border" onClick={() => navigate("/profiles")}>
+        <button
+          className="px-3 py-1.5 rounded border"
+          onClick={() => navigate("/profiles")}
+        >
           Back to List
         </button>
-        <button className="px-3 py-1.5 rounded border" onClick={() => navigate("/profiles", { state: { editClient: client } })}>
+        <button
+          className="px-3 py-1.5 rounded border"
+          onClick={() =>
+            navigate("/profiles", { state: { editClient: client } })
+          }
+        >
           Edit Profile
         </button>
       </div>
@@ -549,67 +804,206 @@ export default function ClientProfileDetails() {
       {/* Add Company Modal */}
       {showAddCompany && (
         <div className="fixed inset-0 z-40">
-          <div className="absolute inset-0 bg-black/40" onClick={() => !updating && setShowAddCompany(false)} />
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => !updating && setShowAddCompany(false)}
+          />
           <div className="absolute inset-0 p-4 overflow-y-auto">
             <div className="mx-auto max-w-2xl bg-card text-foreground rounded-lg border shadow-lg">
               <div className="p-4 border-b flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Add New Company</h2>
-                <button onClick={() => !updating && setShowAddCompany(false)} className="text-sm px-2 py-1 rounded border">Close</button>
+                <button
+                  onClick={() => !updating && setShowAddCompany(false)}
+                  className="text-sm px-2 py-1 rounded border"
+                >
+                  Close
+                </button>
               </div>
               <div className="p-4 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-sm">Company Name *</label>
-                    <input className="w-full border rounded p-2" value={newCompany.companyName} onChange={(e) => setNewCompany((c) => ({ ...c, companyName: e.target.value }))} />
+                    <input
+                      className="w-full border rounded p-2"
+                      value={newCompany.companyName}
+                      onChange={(e) =>
+                        setNewCompany((c) => ({
+                          ...c,
+                          companyName: e.target.value,
+                        }))
+                      }
+                    />
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm">ISIN Number *</label>
-                    <input className="w-full border rounded p-2" value={newCompany.isinNumber} onChange={(e) => setNewCompany((c) => ({ ...c, isinNumber: e.target.value.toUpperCase() }))} />
+                    <input
+                      className="w-full border rounded p-2"
+                      value={newCompany.isinNumber}
+                      onChange={(e) =>
+                        setNewCompany((c) => ({
+                          ...c,
+                          isinNumber: e.target.value.toUpperCase(),
+                        }))
+                      }
+                    />
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm">Folio Number</label>
-                    <input className="w-full border rounded p-2" value={newCompany.folioNumber} onChange={(e) => setNewCompany((c) => ({ ...c, folioNumber: e.target.value }))} />
+                    <input
+                      className="w-full border rounded p-2"
+                      value={newCompany.folioNumber}
+                      onChange={(e) =>
+                        setNewCompany((c) => ({
+                          ...c,
+                          folioNumber: e.target.value,
+                        }))
+                      }
+                    />
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm">Certificate Number</label>
-                    <input className="w-full border rounded p-2" value={newCompany.certificateNumber} onChange={(e) => setNewCompany((c) => ({ ...c, certificateNumber: e.target.value }))} />
+                    <input
+                      className="w-full border rounded p-2"
+                      value={newCompany.certificateNumber}
+                      onChange={(e) =>
+                        setNewCompany((c) => ({
+                          ...c,
+                          certificateNumber: e.target.value,
+                        }))
+                      }
+                    />
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm">Quantity *</label>
-                    <input type="number" className="w-full border rounded p-2" value={newCompany.quantity} onChange={(e) => setNewCompany((c) => ({ ...c, quantity: parseInt(e.target.value) || 0 }))} />
+                    <input
+                      type="number"
+                      className="w-full border rounded p-2"
+                      value={newCompany.quantity}
+                      onChange={(e) =>
+                        setNewCompany((c) => ({
+                          ...c,
+                          quantity: parseInt(e.target.value) || 0,
+                        }))
+                      }
+                    />
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm">Face Value *</label>
-                    <input type="number" step="0.01" className="w-full border rounded p-2" value={newCompany.faceValue} onChange={(e) => setNewCompany((c) => ({ ...c, faceValue: parseFloat(e.target.value) || 0 }))} />
+                    <input
+                      type="number"
+                      step="0.01"
+                      className="w-full border rounded p-2"
+                      value={newCompany.faceValue}
+                      onChange={(e) =>
+                        setNewCompany((c) => ({
+                          ...c,
+                          faceValue: parseFloat(e.target.value) || 0,
+                        }))
+                      }
+                    />
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm">Distinctive From</label>
-                    <input className="w-full border rounded p-2" value={newCompany.distinctiveNumber.from} onChange={(e) => setNewCompany((c) => ({ ...c, distinctiveNumber: { ...c.distinctiveNumber, from: e.target.value } }))} />
+                    <input
+                      className="w-full border rounded p-2"
+                      value={newCompany.distinctiveNumber.from}
+                      onChange={(e) =>
+                        setNewCompany((c) => ({
+                          ...c,
+                          distinctiveNumber: {
+                            ...c.distinctiveNumber,
+                            from: e.target.value,
+                          },
+                        }))
+                      }
+                    />
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm">Distinctive To</label>
-                    <input className="w-full border rounded p-2" value={newCompany.distinctiveNumber.to} onChange={(e) => setNewCompany((c) => ({ ...c, distinctiveNumber: { ...c.distinctiveNumber, to: e.target.value } }))} />
+                    <input
+                      className="w-full border rounded p-2"
+                      value={newCompany.distinctiveNumber.to}
+                      onChange={(e) =>
+                        setNewCompany((c) => ({
+                          ...c,
+                          distinctiveNumber: {
+                            ...c.distinctiveNumber,
+                            to: e.target.value,
+                          },
+                        }))
+                      }
+                    />
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm">Purchase Date</label>
-                    <input type="date" className="w-full border rounded p-2" value={newCompany.purchaseDate} onChange={(e) => setNewCompany((c) => ({ ...c, purchaseDate: e.target.value }))} />
+                    <input
+                      type="date"
+                      className="w-full border rounded p-2"
+                      value={newCompany.purchaseDate}
+                      onChange={(e) =>
+                        setNewCompany((c) => ({
+                          ...c,
+                          purchaseDate: e.target.value,
+                        }))
+                      }
+                    />
                   </div>
                   <div className="space-y-1 col-span-2">
                     <label className="text-sm">Initial Review Status</label>
-                    <select className="w-full border rounded p-2" value={newCompany.review?.status || "pending"} onChange={(e) => setNewCompany((c) => ({ ...c, review: { ...(c.review || {}), status: e.target.value } }))}>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={newCompany.review?.status || "pending"}
+                      onChange={(e) =>
+                        setNewCompany((c) => ({
+                          ...c,
+                          review: {
+                            ...(c.review || {}),
+                            status: e.target.value,
+                          },
+                        }))
+                      }
+                    >
                       {reviewStatusOptions.map((o) => (
-                        <option key={o.value} value={o.value}>{o.label}</option>
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
                       ))}
                     </select>
                   </div>
                   <div className="space-y-1 col-span-2">
                     <label className="text-sm">Initial Review Notes</label>
-                    <textarea className="w-full h-20 p-2 border rounded resize-none" value={newCompany.review?.notes || ""} onChange={(e) => setNewCompany((c) => ({ ...c, review: { ...(c.review || {}), notes: e.target.value } }))} />
+                    <textarea
+                      className="w-full h-20 p-2 border rounded resize-none"
+                      value={newCompany.review?.notes || ""}
+                      onChange={(e) =>
+                        setNewCompany((c) => ({
+                          ...c,
+                          review: {
+                            ...(c.review || {}),
+                            notes: e.target.value,
+                          },
+                        }))
+                      }
+                    />
                   </div>
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
-                  <button className="px-3 py-1.5 rounded border" onClick={() => setShowAddCompany(false)} disabled={updating}>Cancel</button>
-                  <button className="px-3 py-1.5 rounded border" onClick={addCompany} disabled={updating || !newCompany.companyName || !newCompany.isinNumber}>
+                  <button
+                    className="px-3 py-1.5 rounded border"
+                    onClick={() => setShowAddCompany(false)}
+                    disabled={updating}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="px-3 py-1.5 rounded border"
+                    onClick={addCompany}
+                    disabled={
+                      updating ||
+                      !newCompany.companyName ||
+                      !newCompany.isinNumber
+                    }
+                  >
                     {updating ? "Adding..." : "Add Company"}
                   </button>
                 </div>
@@ -622,7 +1016,10 @@ export default function ClientProfileDetails() {
       {/* Review Dialog */}
       {showReviewDialog !== null && (
         <div className="fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setShowReviewDialog(null)} />
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setShowReviewDialog(null)}
+          />
           <div className="absolute inset-0 grid place-items-center p-4">
             <div className="w-full max-w-md bg-card text-foreground rounded-lg border shadow-md">
               <div className="p-4 border-b">
@@ -636,17 +1033,29 @@ export default function ClientProfileDetails() {
                     <>
                       <div>
                         <h4 className="font-semibold">{holding.companyName}</h4>
-                        <p className="text-sm text-muted-foreground">{holding.isinNumber}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {holding.isinNumber}
+                        </p>
                       </div>
                       <div className="space-y-1">
                         <label className="text-sm">Review Status</label>
                         <select
                           className="w-full border rounded p-2"
                           value={holding.review?.status || "pending"}
-                          onChange={(e) => setEditedHolding((p) => ({ ...(p || holding), review: { ...((p && p.review) || holding.review || {}), status: e.target.value } }))}
+                          onChange={(e) =>
+                            setEditedHolding((p) => ({
+                              ...(p || holding),
+                              review: {
+                                ...((p && p.review) || holding.review || {}),
+                                status: e.target.value,
+                              },
+                            }))
+                          }
                         >
                           {reviewStatusOptions.map((o) => (
-                            <option key={o.value} value={o.value}>{o.label}</option>
+                            <option key={o.value} value={o.value}>
+                              {o.label}
+                            </option>
                           ))}
                         </select>
                       </div>
@@ -655,15 +1064,45 @@ export default function ClientProfileDetails() {
                         <textarea
                           className="w-full h-24 p-2 border rounded resize-none"
                           defaultValue={holding.review?.notes || ""}
-                          onChange={(e) => setEditedHolding((p) => ({ ...(p || holding), review: { ...((p && p.review) || holding.review || {}), notes: e.target.value } }))}
+                          onChange={(e) =>
+                            setEditedHolding((p) => ({
+                              ...(p || holding),
+                              review: {
+                                ...((p && p.review) || holding.review || {}),
+                                notes: e.target.value,
+                              },
+                            }))
+                          }
                         />
                       </div>
                       {holding.review?.reviewedAt && (
-                        <div className="text-xs text-muted-foreground">Last reviewed: {formatDateTime(holding.review.reviewedAt)} by {holding.review.reviewedBy}</div>
+                        <div className="text-xs text-muted-foreground">
+                          Last reviewed:{" "}
+                          {formatDateTime(holding.review.reviewedAt)} by{" "}
+                          {holding.review.reviewedBy}
+                        </div>
                       )}
                       <div className="flex justify-end gap-2 pt-2">
-                        <button className="px-3 py-1.5 rounded border" onClick={() => setShowReviewDialog(null)}>Cancel</button>
-                        <button className="px-3 py-1.5 rounded border" onClick={() => saveReviewFor(idx, (editedHolding?.review?.status || holding.review?.status || "pending"), (editedHolding?.review?.notes || holding.review?.notes || ""))}>
+                        <button
+                          className="px-3 py-1.5 rounded border"
+                          onClick={() => setShowReviewDialog(null)}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="px-3 py-1.5 rounded border"
+                          onClick={() =>
+                            saveReviewFor(
+                              idx,
+                              editedHolding?.review?.status ||
+                                holding.review?.status ||
+                                "pending",
+                              editedHolding?.review?.notes ||
+                                holding.review?.notes ||
+                                "",
+                            )
+                          }
+                        >
                           {updating ? "Saving..." : "Save Review"}
                         </button>
                       </div>
