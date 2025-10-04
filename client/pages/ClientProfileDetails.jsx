@@ -166,7 +166,7 @@ export default function ClientProfileDetails() {
   const [editingIndex, setEditingIndex] = useState(null);
   const [editedHolding, setEditedHolding] = useState(null);
   const [showReviewDialog, setShowReviewDialog] = useState(null); // number | null
-  const [showNotesTooltip, setShowNotesTooltip] = useState(null); // {index: number, notes: string} | null
+  const [showNotesTooltip, setShowNotesTooltip] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -675,12 +675,26 @@ export default function ClientProfileDetails() {
                             {h.review?.status || "pending"}
                           </span>
                           {h.review?.notes && (
-                            <button
-                              className="text-blue-600 text-xs underline hover:text-blue-800"
-                              onClick={() => setShowReviewDialog(index)}
-                            >
-                              Notes
-                            </button>
+
+                            <div className="relative">
+                              <button
+                                className="text-blue-600 text-xs underline"
+                                onMouseEnter={() =>
+                                  setShowNotesTooltip({
+                                    index,
+                                    notes: h.review.notes,
+                                  })
+                                }
+                                onMouseLeave={() => setShowNotesTooltip(null)}
+                              >
+                                Notes
+                              </button>
+                              {showNotesTooltip?.index === index && (
+                                <div className="absolute z-10 left-0 top-full mt-1 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg">
+                                  {h.review.notes}
+                                </div>
+                              )}
+                            </div>
                           )}
                         </div>
                       )}
@@ -1133,14 +1147,107 @@ export default function ClientProfileDetails() {
       )}
 
       {/* Review Dialog */}
-      <ReviewDialog
-        showReviewDialog={showReviewDialog}
-        setShowReviewDialog={setShowReviewDialog}
-        filteredHoldings={filteredHoldings}
-        saveReviewFor={saveReviewFor}
-        updating={updating}
-        formatDateTime={formatDateTime}
-      />
+
+      {showReviewDialog !== null && (
+        <div className="fixed inset-0 z-50">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setShowReviewDialog(null)}
+          />
+          <div className="absolute inset-0 grid place-items-center p-4">
+            <div className="w-full max-w-md bg-card text-foreground rounded-lg border shadow-md">
+              <div className="p-4 border-b">
+                <h3 className="font-semibold">Review Company</h3>
+              </div>
+              <div className="p-4 space-y-4">
+                {(() => {
+                  const idx = showReviewDialog;
+                  const holding = filteredHoldings[idx];
+                  return (
+                    <>
+                      <div>
+                        <h4 className="font-semibold">{holding.companyName}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {holding.isinNumber}
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-sm">Review Status</label>
+                        <select
+                          className="w-full border rounded p-2"
+                          value={holding.review?.status || "pending"}
+                          onChange={(e) =>
+                            setEditedHolding((p) => ({
+                              ...(p || holding),
+                              review: {
+                                ...((p && p.review) || holding.review || {}),
+                                status: e.target.value,
+                              },
+                            }))
+                          }
+                        >
+                          {reviewStatusOptions.map((o) => (
+                            <option key={o.value} value={o.value}>
+                              {o.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-sm">Review Notes</label>
+                        <textarea
+                          className="w-full h-24 p-2 border rounded resize-none"
+                          defaultValue={holding.review?.notes || ""}
+                          onChange={(e) =>
+                            setEditedHolding((p) => ({
+                              ...(p || holding),
+                              review: {
+                                ...((p && p.review) || holding.review || {}),
+                                notes: e.target.value,
+                              },
+                            }))
+                          }
+                        />
+                      </div>
+                      {holding.review?.reviewedAt && (
+                        <div className="text-xs text-muted-foreground">
+                          Last reviewed:{" "}
+                          {formatDateTime(holding.review.reviewedAt)} by{" "}
+                          {holding.review.reviewedBy}
+                        </div>
+                      )}
+                      <div className="flex justify-end gap-2 pt-2">
+                        <button
+                          className="px-3 py-1.5 rounded border"
+                          onClick={() => setShowReviewDialog(null)}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="px-3 py-1.5 rounded border"
+                          onClick={() =>
+                            saveReviewFor(
+                              idx,
+                              editedHolding?.review?.status ||
+                                holding.review?.status ||
+                                "pending",
+                              editedHolding?.review?.notes ||
+                                holding.review?.notes ||
+                                "",
+                            )
+                          }
+                        >
+                          {updating ? "Saving..." : "Save Review"}
+                        </button>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

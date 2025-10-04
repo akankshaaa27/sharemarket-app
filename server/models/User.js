@@ -1,86 +1,22 @@
 import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
 
-const userSchema = new mongoose.Schema(
+const { Schema, model } = mongoose;
+
+const UserSchema = new Schema(
   {
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-    },
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-    password: {
-      type: String,
-      required: true,
-    },
-    plainPassword: {
-      type: String,
-      required: true,
-    },
-    phoneNumber: {
-      type: String,
-      trim: true,
-    },
-    role: {
-      type: String,
-      enum: ["client", "employee", "admin"],
-      default: "client",
-    },
-    clientId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "ClientProfile",
-    },
-    assignedClients: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "ClientProfile",
-    }],
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-    resetPasswordToken: String,
-    resetPasswordExpires: Date,
+    username: { type: String, required: true, trim: true, unique: true, index: true },
+    name: { type: String, trim: true },
+    email: { type: String, trim: true, lowercase: true, index: true },
+    phone: { type: String, trim: true },
+    role: { type: String, enum: ["admin", "employee", "client"], default: "client", index: true },
+    passwordHash: { type: String, required: true },
+    passwordPlain: { type: String, default: null },
+    createdAt: { type: Date, default: Date.now },
+    assignedClientIds: [{ type: Schema.Types.ObjectId, ref: "ClientProfile" }],
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
-    return next();
-  }
-  
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
-});
+UserSchema.index({ email: 1, username: 1 });
 
-userSchema.methods.comparePassword = async function (candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
-};
-
-userSchema.methods.toSafeObject = function () {
-  const obj = this.toObject();
-  delete obj.password;
-  delete obj.plainPassword;
-  delete obj.resetPasswordToken;
-  delete obj.resetPasswordExpires;
-  return obj;
-};
-
-const User = mongoose.model("User", userSchema);
-
-export default User;
+export default mongoose.models.User || model("User", UserSchema);

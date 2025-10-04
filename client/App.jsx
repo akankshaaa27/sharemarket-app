@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Routes, Route, NavLink, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Dashboard from "./pages/Index.jsx";
@@ -14,122 +14,54 @@ import UserManagement from "./pages/UserManagement.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import { auth } from "./lib/auth.js";
-import { LogOut, Users } from "lucide-react";
+import Navbar from "./components/Navbar.jsx";
+
+/* Theme toggle is provided by components/ThemeToggle.jsx */
+function ThemeToggle_REMOVED_DO_NOT_USE() {
+  const [theme, setTheme] = useState(
+    typeof window !== "undefined" ? localStorage.getItem("theme") || "light" : "light",
+  );
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "dark") root.classList.add("dark");
+    else root.classList.remove("dark");
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+  return (
+    <button
+      onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+      className="px-3 py-1.5 rounded border text-xs"
+      aria-label="Toggle theme"
+      title="Toggle theme"
+    >
+      {theme === "dark" ? "Light" : "Dark"}
+    </button>
+  );
+}
 
 function Layout({ children }) {
-  const navigate = useNavigate();
   const [user, setUser] = useState(null);
-
   useEffect(() => {
-    const currentUser = auth.getUser();
-    setUser(currentUser);
+    try {
+      const u = auth.getUser?.() || null;
+      setUser(u);
+    } catch {}
   }, []);
-
-  const handleLogout = () => {
-    auth.logout();
-    navigate("/login");
-  };
-
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="w-64 border-r bg-white shadow-lg">
-        <div className="p-6">
-          <h1 className="text-lg font-bold text-gray-800 mb-6">ShareMarket Manager Pro</h1>
-          
-          {user && (
-            <div className="mb-6 p-3 bg-blue-50 rounded-lg">
-              <p className="text-sm font-medium text-gray-800">{user.name}</p>
-              <p className="text-xs text-gray-600">{user.email}</p>
-              <p className="text-xs text-blue-600 font-semibold mt-1">{user.role}</p>
-            </div>
-          )}
+    <div className="min-h-screen bg-background text-foreground">
+      <Navbar />
+      <div className="pointer-events-none fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-accent/40 via-background to-background" />
+        <div className="absolute left-1/2 top-[-10%] h-[40rem] w-[40rem] -translate-x-1/2 rounded-full bg-primary/5 blur-3xl" />
+      </div>
 
-          <nav className="flex flex-col gap-2">
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                `px-4 py-2 rounded-lg transition ${
-                  isActive
-                    ? "bg-blue-600 text-white font-semibold"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`
-              }
-            >
-              Dashboard
-            </NavLink>
-            <NavLink
-              to="/profiles"
-              className={({ isActive }) =>
-                `px-4 py-2 rounded-lg transition ${
-                  isActive
-                    ? "bg-blue-600 text-white font-semibold"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`
-              }
-            >
-              Profiles
-            </NavLink>
-            <NavLink
-              to="/shareholders"
-              className={({ isActive }) =>
-                `px-4 py-2 rounded-lg transition ${
-                  isActive
-                    ? "bg-blue-600 text-white font-semibold"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`
-              }
-            >
-              Shareholders
-            </NavLink>
-            <NavLink
-              to="/dmat"
-              className={({ isActive }) =>
-                `px-4 py-2 rounded-lg transition ${
-                  isActive
-                    ? "bg-blue-600 text-white font-semibold"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`
-              }
-            >
-              DMAT
-            </NavLink>
+      <div className="flex min-h-screen">
+        {/* Top Navbar handles navigation on all breakpoints */}
 
-            {user && user.role === "admin" && (
-              <>
-                <div className="border-t border-gray-200 my-3"></div>
-                <NavLink
-                  to="/users"
-                  className={({ isActive }) =>
-                    `px-4 py-2 rounded-lg transition flex items-center gap-2 ${
-                      isActive
-                        ? "bg-blue-600 text-white font-semibold"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }`
-                  }
-                >
-                  <Users size={18} />
-                  User Management
-                </NavLink>
-              </>
-            )}
-          </nav>
-
-          <div className="border-t border-gray-200 my-6"></div>
-
-          <button
-            onClick={handleLogout}
-            className="w-full px-4 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition flex items-center gap-2 justify-center font-medium"
-          >
-            <LogOut size={18} />
-            Logout
-          </button>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 p-6 overflow-auto">{children}</main>
-      <ToastContainer position="top-right" autoClose={3000} />
+        <main className="flex-1 p-4 md:p-6">
+          <div className="mx-auto max-w-7xl">{children}</div>
+        </main>
+      </div>
     </div>
   );
 }

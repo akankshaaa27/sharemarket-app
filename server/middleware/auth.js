@@ -1,66 +1,37 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-this-in-production";
+const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change";
 
-export function authenticateToken(req, res, next) {
+export async function auth(req, res, next) {
   try {
-    const token = req.headers.authorization?.replace("Bearer ", "");
-
-    if (!token) {
-      return res.status(401).json({ error: "Authentication required" });
-    }
-
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
+    const header = req.headers.authorization || "";
+    const token = header.startsWith("Bearer ") ? header.slice(7) : null;
+    if (!token) return res.status(401).json({ error: "Missing token" });
+    const payload = jwt.verify(token, JWT_SECRET);
+    const user = await User.findById(payload.sub);
+    if (!user) return res.status(401).json({ error: "Invalid token" });
+    req.user = user;
     next();
-  } catch (error) {
-    console.error("Auth middleware error:", error);
-    return res.status(401).json({ error: "Invalid or expired token" });
+  } catch (e) {
+    return res.status(401).json({ error: "Unauthorized" });
   }
 }
 
-export function isAdmin(req, res, next) {
-  if (req.user.role !== "admin") {
-    return res.status(403).json({ error: "Admin access required" });
-  }
-  next();
+export function requireRole(...roles) {
+  return (req, res, next) => {
+    if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+    if (!roles.includes(req.user.role)) return res.status(403).json({ error: "Forbidden" });
+    next();
+  };
 }
 
-export function isEmployee(req, res, next) {
-  if (req.user.role !== "employee" && req.user.role !== "admin") {
-    return res.status(403).json({ error: "Employee or admin access required" });
-  }
-  next();
+export function issueToken(user) {
+  const payload = { sub: user._id.toString(), role: user.role };
+  const opts = { expiresIn: "7d" };
+  return jwt.sign(payload, JWT_SECRET, opts);
 }
 
-export async function canAccessClient(req, res, next) {
-  try {
-    if (req.user.role === "admin") {
-      return next();
-    }
-
-    const clientId = req.params.id || req.body.clientId;
-    
-    if (req.user.role === "client") {
-      const user = await User.findById(req.user.userId);
-      if (user.clientId && user.clientId.toString() === clientId) {
-        return next();
-      }
-      return res.status(403).json({ error: "Access denied" });
-    }
-
-    if (req.user.role === "employee") {
-      const user = await User.findById(req.user.userId);
-      if (user.assignedClients && user.assignedClients.some(id => id.toString() === clientId)) {
-        return next();
-      }
-      return res.status(403).json({ error: "Access denied" });
-    }
-
-    return res.status(403).json({ error: "Access denied" });
-  } catch (error) {
-    console.error("Access control error:", error);
-    return res.status(500).json({ error: "Failed to verify access" });
-  }
-}
+// Aliases for compatibility with alternative route implementations
+export const authenticateToken = auth;
+export const isAdmin = (req, res, next) => requireRole("admin")(req, res, next);

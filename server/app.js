@@ -27,6 +27,8 @@ export function createServer() {
   };
 
   app.use("/api/auth", authRoutes);
+
+  // app.use("/api/auth", ensureDB, authRoutes);
   app.use("/api/users", ensureDB, userRoutes);
   app.use("/api/shareholders", shareholderRoutes);
   app.use("/api/dmat", ensureDB, dmatRoutes);

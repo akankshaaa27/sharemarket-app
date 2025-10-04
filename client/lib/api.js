@@ -1,8 +1,13 @@
 const API_BASE = "/api";
 
 async function request(path, options = {}) {
+  const token =
+    typeof localStorage !== "undefined" ? localStorage.getItem("token") : null;
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     credentials: "same-origin",
     ...options,
   });
@@ -56,4 +61,25 @@ export const api = {
     }),
   deleteProfile: (id) =>
     request(`/client-profiles/${id}`, { method: "DELETE" }),
+  exportAllProfiles: () => request(`/client-profiles/export`),
+  exportProfile: (id) => request(`/client-profiles/${id}/export`),
+
+  // Auth
+  login: (data) =>
+    request(`/auth/login`, { method: "POST", body: JSON.stringify(data) }),
+  me: () => request(`/auth/me`),
+  forgot: (data) =>
+    request(`/auth/forgot`, { method: "POST", body: JSON.stringify(data) }),
+  reset: (data) =>
+    request(`/auth/reset`, { method: "POST", body: JSON.stringify(data) }),
+
+  // Users (admin)
+  listUsers: () => request(`/users`),
+  updateUser: (id, data) =>
+    request(`/users/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  adminResetPassword: (id, data) =>
+    request(`/users/${id}/reset-password`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 };
