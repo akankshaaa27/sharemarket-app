@@ -21,7 +21,7 @@ export default function ClientProfiles() {
 
   const [editing, setEditing] = useState(null);
   const [savingEdit, setSavingEdit] = useState(false);
-  const [showReviewDialog, setShowReviewDialog] = useState(null); // number | null
+  const [showReviewDialog, setShowReviewDialog] = useState(null);
 
   const emptyHolding = () => ({
     companyName: "",
@@ -36,24 +36,84 @@ export default function ClientProfiles() {
   });
 
   const initialForm = () => ({
-    shareholderName: { name1: "", name2: "", name3: "" },
+    // Basic Client Information
+    clientId: "",
+    shortName: "",
+    clientType: "Resident",
+    accountCategory: "Beneficiary",
+    subType: "Ordinary",
+    status: "Active",
+    accountActivationDate: new Date().toISOString().slice(0, 10),
+    statusChangeReason: "",
+    statusChangeDate: "",
+
+    // Personal Details
+    shareholderName: {
+      name1: "",
+      name2: "",
+      name3: "",
+      fatherOrSpouseName: ""
+    },
     panNumber: "",
     aadhaarNumber: "",
-    address: "",
+    occupation: "",
+    address: {
+      line1: "",
+      line2: "",
+      city: "",
+      state: "",
+      pincode: "",
+      country: "India"
+    },
+    mobileNumber: "",
+    emailId: "",
+    eDisFlag: "N",
+    oneTimeDeclarationFlag: "Not Submitted",
+
+    // Financial Details
     bankDetails: {
-      bankNumber: "",
-      branch: "",
+      bankAccountNumber: "",
+      bankAccountType: "Savings",
       bankName: "",
+      branchCode: "",
       ifscCode: "",
       micrCode: "",
+      bankAddress: "",
+      leiNumber: ""
     },
+
+    // Income & Net Worth
+    grossAnnualIncomeRange: "",
+    netWorth: "",
+    netWorthAsOnDate: "",
+
+    // Additional Flags
+    familyFlagMobile: "",
+    familyFlagEmail: "",
+    smsFacility: "Available",
+    panFlag: "Not Verified",
+    atmFlag: "Not Assigned",
+    receivePhysicalCommunicationsFlag: "Not Available",
+
+    // Demat Account Details
     dematAccountNumber: "",
-    dematCreatedWith: "",
-    dematCreatedWithPerson: "",
-    dematCreatedWithPersonNumber: "",
+    dpId: "IN300095",
+    dpName: "ILAFS SECURITIES SERVICES LIMITED",
+    standingInstruction: "N",
+
+    // Nominee Details
+    nominee: {
+      name: "",
+      pan: "",
+      address: "",
+      pincode: "",
+      aadhaar: "",
+      emailId: "",
+      relationship: ""
+    },
+
     shareHoldings: [emptyHolding()],
     currentDate: new Date().toISOString().slice(0, 10),
-    status: "Active",
     remarks: "",
     dividend: { amount: 0, date: new Date().toISOString().slice(0, 10) },
   });
@@ -79,11 +139,13 @@ export default function ClientProfiles() {
       ...f,
       shareHoldings: [...f.shareHoldings, emptyHolding()],
     }));
+
   const removeShareHolding = (index) =>
     setForm((f) => ({
       ...f,
       shareHoldings: f.shareHoldings.filter((_, i) => i !== index),
     }));
+
   const updateShareHolding = (index, key, value) =>
     setForm((f) => ({
       ...f,
@@ -158,12 +220,14 @@ export default function ClientProfiles() {
       shareHoldings: [...(e?.shareHoldings || []), emptyHolding()],
     }));
   }
+
   function removeEditingShareHolding(index) {
     setEditing((e) => ({
       ...e,
       shareHoldings: e.shareHoldings.filter((_, i) => i !== index),
     }));
   }
+
   function updateEditingShareHolding(index, field, value) {
     setEditing((e) => ({
       ...e,
@@ -195,14 +259,14 @@ export default function ClientProfiles() {
       shareHoldings: e.shareHoldings.map((h, i) =>
         i === index
           ? {
-              ...h,
-              review: {
-                status,
-                notes,
-                reviewedAt: new Date().toISOString(),
-                reviewedBy: "Current User",
-              },
-            }
+            ...h,
+            review: {
+              status,
+              notes,
+              reviewedAt: new Date().toISOString(),
+              reviewedBy: "Current User",
+            },
+          }
           : h,
       ),
     }));
@@ -215,7 +279,7 @@ export default function ClientProfiles() {
         <div className="flex gap-2">
           <input
             className="border rounded p-2 w-64"
-            placeholder="Search by name, PAN, company..."
+            placeholder="Search by name, PAN, client ID..."
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
@@ -253,6 +317,7 @@ export default function ClientProfiles() {
         <table className="w-full text-sm border">
           <thead className="bg-muted">
             <tr>
+              <th className="p-2 text-left">Client ID</th>
               <th className="p-2 text-left">Shareholder</th>
               <th className="p-2 text-left">PAN</th>
               <th className="p-2 text-left">Status</th>
@@ -262,6 +327,7 @@ export default function ClientProfiles() {
           <tbody>
             {items.map((p) => (
               <tr key={p._id} className="border-t">
+                <td className="p-2">{p.clientId}</td>
                 <td className="p-2">{p.shareholderName?.name1}</td>
                 <td className="p-2">{p.panNumber}</td>
                 <td className="p-2">{p.status}</td>
@@ -299,7 +365,7 @@ export default function ClientProfiles() {
             onClick={() => !saving && setOpen(false)}
           />
           <div className="absolute inset-0 p-4 overflow-y-auto">
-            <div className="mx-auto max-w-5xl bg-card text-foreground rounded-lg border shadow-lg">
+            <div className="mx-auto max-w-6xl bg-card text-foreground rounded-lg border shadow-lg">
               <div className="p-4 border-b flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Create Client Profile</h2>
                 <button
@@ -309,10 +375,142 @@ export default function ClientProfiles() {
                   Close
                 </button>
               </div>
-              <form onSubmit={onCreate} className="p-4 space-y-6">
+              <form onSubmit={onCreate} className="p-4 space-y-6 max-h-[80vh] overflow-y-auto">
+                {/* Basic Client Information */}
                 <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg">
                   <h3 className="col-span-2 font-semibold">
-                    Client Information
+                    Basic Client Information
+                  </h3>
+                  <div className="space-y-1">
+                    <label className="text-sm">Client ID *</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={form.clientId}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          clientId: e.target.value,
+                        }))
+                      }
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Short Name</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={form.shortName}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          shortName: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Client Type</label>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={form.clientType}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          clientType: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="Resident">Resident</option>
+                      <option value="Non-Resident">Non-Resident</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Account Category</label>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={form.accountCategory}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          accountCategory: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="Beneficiary">Beneficiary</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Sub Type</label>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={form.subType}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          subType: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="Ordinary">Ordinary</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Status</label>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={form.status}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          status: e.target.value,
+                        }))
+                      }
+                    >
+                      {["Active", "Closed", "Pending", "Suspended"].map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Account Activation Date</label>
+                    <input
+                      type="date"
+                      className="w-full border rounded p-2"
+                      value={form.accountActivationDate}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          accountActivationDate: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Standing Instruction</label>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={form.standingInstruction}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          standingInstruction: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="N">No</option>
+                      <option value="Y">Yes</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Personal Details */}
+                <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg">
+                  <h3 className="col-span-2 font-semibold">
+                    Personal Details
                   </h3>
                   <div className="col-span-2 grid grid-cols-3 gap-3">
                     <div className="space-y-1">
@@ -366,6 +564,35 @@ export default function ClientProfiles() {
                     </div>
                   </div>
                   <div className="space-y-1">
+                    <label className="text-sm">Father/Spouse Name</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={form.shareholderName.fatherOrSpouseName}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          shareholderName: {
+                            ...f.shareholderName,
+                            fatherOrSpouseName: e.target.value,
+                          },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Occupation</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={form.occupation}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          occupation: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
                     <label className="text-sm">PAN *</label>
                     <input
                       className="w-full border rounded p-2"
@@ -396,111 +623,182 @@ export default function ClientProfiles() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm">Demat Account Number</label>
+                    <label className="text-sm">Mobile Number</label>
                     <input
                       className="w-full border rounded p-2"
-                      value={form.dematAccountNumber}
+                      value={form.mobileNumber}
                       onChange={(e) =>
                         setForm((f) => ({
                           ...f,
-                          dematAccountNumber: e.target.value,
+                          mobileNumber: e.target.value,
                         }))
                       }
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm">
-                      Demat Account Created With
-                    </label>
+                    <label className="text-sm">Email ID</label>
                     <input
+                      type="email"
                       className="w-full border rounded p-2"
-                      value={form.dematCreatedWith}
+                      value={form.emailId}
                       onChange={(e) =>
                         setForm((f) => ({
                           ...f,
-                          dematCreatedWith: e.target.value,
+                          emailId: e.target.value,
                         }))
                       }
-                      placeholder="e.g., NSDL, CDSL, Bank Name"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-sm">
-                      DMAT Account Created By (Person)
-                    </label>
-                    <input
-                      className="w-full border rounded p-2"
-                      value={form.dematCreatedWithPerson}
-                      onChange={(e) =>
-                        setForm((f) => ({
-                          ...f,
-                          dematCreatedWithPerson: e.target.value,
-                        }))
-                      }
-                      placeholder="Person who created DMAT"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-sm">Creator Contact Number</label>
-                    <input
-                      className="w-full border rounded p-2"
-                      value={form.dematCreatedWithPersonNumber || ""}
-                      onChange={(e) =>
-                        setForm((f) => ({
-                          ...f,
-                          dematCreatedWithPersonNumber: e.target.value
-                            .replace(/\D/g, "")
-                            .slice(0, 15),
-                        }))
-                      }
-                      placeholder="Phone number"
                     />
                   </div>
                   <div className="col-span-2 space-y-1">
-                    <label className="text-sm">Address</label>
+                    <label className="text-sm">Address Line 1</label>
                     <input
                       className="w-full border rounded p-2"
-                      value={form.address}
+                      value={form.address.line1}
                       onChange={(e) =>
-                        setForm((f) => ({ ...f, address: e.target.value }))
+                        setForm((f) => ({
+                          ...f,
+                          address: { ...f.address, line1: e.target.value },
+                        }))
                       }
                     />
+                  </div>
+                  <div className="col-span-2 space-y-1">
+                    <label className="text-sm">Address Line 2</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={form.address.line2}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          address: { ...f.address, line2: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">City</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={form.address.city}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          address: { ...f.address, city: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">State</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={form.address.state}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          address: { ...f.address, state: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Pincode</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={form.address.pincode}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          address: { ...f.address, pincode: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Country</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={form.address.country}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          address: { ...f.address, country: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">e-DIS Flag</label>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={form.eDisFlag}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          eDisFlag: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="Y">Yes</option>
+                      <option value="N">No</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">SMS Facility</label>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={form.smsFacility}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          smsFacility: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="Available">Available</option>
+                      <option value="Not Available">Not Available</option>
+                    </select>
                   </div>
                 </div>
 
+                {/* Financial Details */}
                 <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg">
-                  <h3 className="col-span-2 font-semibold">Bank Details</h3>
+                  <h3 className="col-span-2 font-semibold">Financial Details</h3>
                   <div className="space-y-1">
-                    <label className="text-sm">Bank Number</label>
+                    <label className="text-sm">Bank Account Number</label>
                     <input
                       className="w-full border rounded p-2"
-                      value={form.bankDetails.bankNumber}
+                      value={form.bankDetails.bankAccountNumber}
                       onChange={(e) =>
                         setForm((f) => ({
                           ...f,
                           bankDetails: {
                             ...f.bankDetails,
-                            bankNumber: e.target.value,
+                            bankAccountNumber: e.target.value,
                           },
                         }))
                       }
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm">Branch</label>
-                    <input
+                    <label className="text-sm">Bank Account Type</label>
+                    <select
                       className="w-full border rounded p-2"
-                      value={form.bankDetails.branch}
+                      value={form.bankDetails.bankAccountType}
                       onChange={(e) =>
                         setForm((f) => ({
                           ...f,
                           bankDetails: {
                             ...f.bankDetails,
-                            branch: e.target.value,
+                            bankAccountType: e.target.value,
                           },
                         }))
                       }
-                    />
+                    >
+                      <option value="Savings">Savings</option>
+                      <option value="Current">Current</option>
+                      <option value="Other">Other</option>
+                    </select>
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm">Bank Name</label>
@@ -513,6 +811,22 @@ export default function ClientProfiles() {
                           bankDetails: {
                             ...f.bankDetails,
                             bankName: e.target.value,
+                          },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Branch Code</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={form.bankDetails.branchCode}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          bankDetails: {
+                            ...f.bankDetails,
+                            branchCode: e.target.value,
                           },
                         }))
                       }
@@ -550,8 +864,178 @@ export default function ClientProfiles() {
                       }
                     />
                   </div>
+                  <div className="col-span-2 space-y-1">
+                    <label className="text-sm">Bank Address</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={form.bankDetails.bankAddress}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          bankDetails: {
+                            ...f.bankDetails,
+                            bankAddress: e.target.value,
+                          },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">LEI Number</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={form.bankDetails.leiNumber}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          bankDetails: {
+                            ...f.bankDetails,
+                            leiNumber: e.target.value,
+                          },
+                        }))
+                      }
+                    />
+                  </div>
                 </div>
 
+                {/* Income & Net Worth */}
+                <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg">
+                  <h3 className="col-span-2 font-semibold">Income & Net Worth</h3>
+                  <div className="space-y-1">
+                    <label className="text-sm">Gross Annual Income Range</label>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={form.grossAnnualIncomeRange}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          grossAnnualIncomeRange: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="">Select Range</option>
+                      <option value="0-2 Lacs">0-2 Lacs</option>
+                      <option value="2-5 Lacs">2-5 Lacs</option>
+                      <option value="5-10 Lacs">5-10 Lacs</option>
+                      <option value="10-25 Lacs">10-25 Lacs</option>
+                      <option value="25+ Lacs">25+ Lacs</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Net Worth (₹)</label>
+                    <input
+                      type="number"
+                      className="w-full border rounded p-2"
+                      value={form.netWorth}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          netWorth: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Net Worth As On Date</label>
+                    <input
+                      type="date"
+                      className="w-full border rounded p-2"
+                      value={form.netWorthAsOnDate}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          netWorthAsOnDate: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+
+                {/* Nominee Details */}
+                <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg">
+                  <h3 className="col-span-2 font-semibold">Nominee Details</h3>
+                  <div className="space-y-1">
+                    <label className="text-sm">Nominee Name</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={form.nominee.name}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          nominee: { ...f.nominee, name: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Nominee PAN</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={form.nominee.pan}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          nominee: { ...f.nominee, pan: e.target.value.toUpperCase() },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="col-span-2 space-y-1">
+                    <label className="text-sm">Nominee Address</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={form.nominee.address}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          nominee: { ...f.nominee, address: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Nominee Pincode</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={form.nominee.pincode}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          nominee: { ...f.nominee, pincode: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Nominee Aadhaar</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={form.nominee.aadhaar}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          nominee: { ...f.nominee, aadhaar: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Nominee Email ID</label>
+                    <input
+                      type="email"
+                      className="w-full border rounded p-2"
+                      value={form.nominee.emailId}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          nominee: { ...f.nominee, emailId: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+
+                {/* Share Holdings Section */}
                 <div className="p-4 border rounded-lg">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-semibold">Share Holdings</h3>
@@ -725,80 +1209,6 @@ export default function ClientProfiles() {
                   ))}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg">
-                  <h3 className="col-span-2 font-semibold">
-                    Additional Information
-                  </h3>
-                  <div className="space-y-1">
-                    <label className="text-sm">Current Date</label>
-                    <input
-                      type="date"
-                      className="w-full border rounded p-2"
-                      value={form.currentDate}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, currentDate: e.target.value }))
-                      }
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-sm">Status</label>
-                    <select
-                      className="w-full border rounded p-2"
-                      value={form.status}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, status: e.target.value }))
-                      }
-                    >
-                      {["Active", "Closed", "Pending", "Suspended"].map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="col-span-2 space-y-1">
-                    <label className="text-sm">Remarks</label>
-                    <input
-                      className="w-full border rounded p-2"
-                      value={form.remarks}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, remarks: e.target.value }))
-                      }
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-sm">Dividend Amount</label>
-                    <input
-                      type="number"
-                      className="w-full border rounded p-2"
-                      value={form.dividend.amount}
-                      onChange={(e) =>
-                        setForm((f) => ({
-                          ...f,
-                          dividend: {
-                            ...f.dividend,
-                            amount: Number(e.target.value),
-                          },
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-sm">Dividend Date</label>
-                    <input
-                      type="date"
-                      className="w-full border rounded p-2"
-                      value={form.dividend.date}
-                      onChange={(e) =>
-                        setForm((f) => ({
-                          ...f,
-                          dividend: { ...f.dividend, date: e.target.value },
-                        }))
-                      }
-                    />
-                  </div>
-                </div>
-
                 <div className="flex justify-end gap-3 pt-4 border-t">
                   <button
                     type="button"
@@ -809,7 +1219,7 @@ export default function ClientProfiles() {
                   </button>
                   <button
                     disabled={
-                      saving || !form.shareholderName.name1 || !form.panNumber
+                      saving || !form.shareholderName.name1 || !form.panNumber || !form.clientId
                     }
                     className="bg-primary text-primary-foreground px-4 py-2 rounded disabled:opacity-50"
                   >
@@ -822,6 +1232,7 @@ export default function ClientProfiles() {
         </div>
       )}
 
+      {/* Edit Modal - Similar structure but for editing */}
       {/* Edit Modal */}
       {editing && (
         <div className="fixed inset-0 z-40">
@@ -830,7 +1241,7 @@ export default function ClientProfiles() {
             onClick={() => !savingEdit && setEditing(null)}
           />
           <div className="absolute inset-0 p-4 overflow-y-auto">
-            <div className="mx-auto max-w-5xl bg-card text-foreground rounded-lg border shadow-lg">
+            <div className="mx-auto max-w-6xl bg-card text-foreground rounded-lg border shadow-lg">
               <div className="p-4 border-b flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Edit Client Profile</h2>
                 <button
@@ -840,10 +1251,142 @@ export default function ClientProfiles() {
                   Close
                 </button>
               </div>
-              <div className="p-4 space-y-6">
+              <div className="p-4 space-y-6 max-h-[80vh] overflow-y-auto">
+                {/* Basic Client Information */}
                 <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg">
                   <h3 className="col-span-2 font-semibold">
-                    Client Information
+                    Basic Client Information
+                  </h3>
+                  <div className="space-y-1">
+                    <label className="text-sm">Client ID *</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={editing.clientId || ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          clientId: e.target.value,
+                        }))
+                      }
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Short Name</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={editing.shortName || ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          shortName: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Client Type</label>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={editing.clientType || "Resident"}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          clientType: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="Resident">Resident</option>
+                      <option value="Non-Resident">Non-Resident</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Account Category</label>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={editing.accountCategory || "Beneficiary"}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          accountCategory: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="Beneficiary">Beneficiary</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Sub Type</label>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={editing.subType || "Ordinary"}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          subType: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="Ordinary">Ordinary</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Status</label>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={editing.status || "Active"}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          status: e.target.value,
+                        }))
+                      }
+                    >
+                      {["Active", "Closed", "Pending", "Suspended"].map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Account Activation Date</label>
+                    <input
+                      type="date"
+                      className="w-full border rounded p-2"
+                      value={editing.accountActivationDate ? String(editing.accountActivationDate).slice(0, 10) : ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          accountActivationDate: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Standing Instruction</label>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={editing.standingInstruction || "N"}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          standingInstruction: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="N">No</option>
+                      <option value="Y">Yes</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Personal Details */}
+                <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg">
+                  <h3 className="col-span-2 font-semibold">
+                    Personal Details
                   </h3>
                   <div className="col-span-2 grid grid-cols-3 gap-3">
                     <div className="space-y-1">
@@ -852,14 +1395,15 @@ export default function ClientProfiles() {
                         className="w-full border rounded p-2"
                         value={editing.shareholderName?.name1 || ""}
                         onChange={(e) =>
-                          setEditing((ed) => ({
-                            ...ed,
+                          setEditing((f) => ({
+                            ...f,
                             shareholderName: {
-                              ...(ed.shareholderName || {}),
+                              ...(f.shareholderName || {}),
                               name1: e.target.value,
                             },
                           }))
                         }
+                        required
                       />
                     </div>
                     <div className="space-y-1">
@@ -868,10 +1412,10 @@ export default function ClientProfiles() {
                         className="w-full border rounded p-2"
                         value={editing.shareholderName?.name2 || ""}
                         onChange={(e) =>
-                          setEditing((ed) => ({
-                            ...ed,
+                          setEditing((f) => ({
+                            ...f,
                             shareholderName: {
-                              ...(ed.shareholderName || {}),
+                              ...(f.shareholderName || {}),
                               name2: e.target.value,
                             },
                           }))
@@ -884,10 +1428,10 @@ export default function ClientProfiles() {
                         className="w-full border rounded p-2"
                         value={editing.shareholderName?.name3 || ""}
                         onChange={(e) =>
-                          setEditing((ed) => ({
-                            ...ed,
+                          setEditing((f) => ({
+                            ...f,
                             shareholderName: {
-                              ...(ed.shareholderName || {}),
+                              ...(f.shareholderName || {}),
                               name3: e.target.value,
                             },
                           }))
@@ -896,16 +1440,46 @@ export default function ClientProfiles() {
                     </div>
                   </div>
                   <div className="space-y-1">
+                    <label className="text-sm">Father/Spouse Name</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={editing.shareholderName?.fatherOrSpouseName || ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          shareholderName: {
+                            ...(f.shareholderName || {}),
+                            fatherOrSpouseName: e.target.value,
+                          },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Occupation</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={editing.occupation || ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          occupation: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
                     <label className="text-sm">PAN *</label>
                     <input
                       className="w-full border rounded p-2"
                       value={editing.panNumber || ""}
                       onChange={(e) =>
-                        setEditing((ed) => ({
-                          ...ed,
+                        setEditing((f) => ({
+                          ...f,
                           panNumber: e.target.value.toUpperCase(),
                         }))
                       }
+                      required
                     />
                   </div>
                   <div className="space-y-1">
@@ -914,118 +1488,193 @@ export default function ClientProfiles() {
                       className="w-full border rounded p-2"
                       value={editing.aadhaarNumber || ""}
                       onChange={(e) =>
-                        setEditing((ed) => ({
-                          ...ed,
+                        setEditing((f) => ({
+                          ...f,
                           aadhaarNumber: e.target.value
                             .replace(/\D/g, "")
                             .slice(0, 12),
                         }))
                       }
+                      placeholder="12-digit Aadhaar number"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm">Demat Account Number</label>
+                    <label className="text-sm">Mobile Number</label>
                     <input
                       className="w-full border rounded p-2"
-                      value={editing.dematAccountNumber || ""}
+                      value={editing.mobileNumber || ""}
                       onChange={(e) =>
-                        setEditing((ed) => ({
-                          ...ed,
-                          dematAccountNumber: e.target.value,
+                        setEditing((f) => ({
+                          ...f,
+                          mobileNumber: e.target.value,
                         }))
                       }
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm">
-                      Demat Account Created With
-                    </label>
+                    <label className="text-sm">Email ID</label>
                     <input
+                      type="email"
                       className="w-full border rounded p-2"
-                      value={editing.dematCreatedWith || ""}
+                      value={editing.emailId || ""}
                       onChange={(e) =>
-                        setEditing((ed) => ({
-                          ...ed,
-                          dematCreatedWith: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-sm">
-                      DMAT Account Created By (Person)
-                    </label>
-                    <input
-                      className="w-full border rounded p-2"
-                      value={editing.dematCreatedWithPerson || ""}
-                      onChange={(e) =>
-                        setEditing((ed) => ({
-                          ...ed,
-                          dematCreatedWithPerson: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-sm">Creator Contact Number</label>
-                    <input
-                      className="w-full border rounded p-2"
-                      value={editing.dematCreatedWithPersonNumber || ""}
-                      onChange={(e) =>
-                        setEditing((ed) => ({
-                          ...ed,
-                          dematCreatedWithPersonNumber: e.target.value
-                            .replace(/\D/g, "")
-                            .slice(0, 15),
+                        setEditing((f) => ({
+                          ...f,
+                          emailId: e.target.value,
                         }))
                       }
                     />
                   </div>
                   <div className="col-span-2 space-y-1">
-                    <label className="text-sm">Address</label>
+                    <label className="text-sm">Address Line 1</label>
                     <input
                       className="w-full border rounded p-2"
-                      value={editing.address || ""}
+                      value={editing.address?.line1 || ""}
                       onChange={(e) =>
-                        setEditing((ed) => ({ ...ed, address: e.target.value }))
+                        setEditing((f) => ({
+                          ...f,
+                          address: { ...(f.address || {}), line1: e.target.value },
+                        }))
                       }
                     />
+                  </div>
+                  <div className="col-span-2 space-y-1">
+                    <label className="text-sm">Address Line 2</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={editing.address?.line2 || ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          address: { ...(f.address || {}), line2: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">City</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={editing.address?.city || ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          address: { ...(f.address || {}), city: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">State</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={editing.address?.state || ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          address: { ...(f.address || {}), state: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Pincode</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={editing.address?.pincode || ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          address: { ...(f.address || {}), pincode: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Country</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={editing.address?.country || "India"}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          address: { ...(f.address || {}), country: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">e-DIS Flag</label>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={editing.eDisFlag || "N"}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          eDisFlag: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="Y">Yes</option>
+                      <option value="N">No</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">SMS Facility</label>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={editing.smsFacility || "Available"}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          smsFacility: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="Available">Available</option>
+                      <option value="Not Available">Not Available</option>
+                    </select>
                   </div>
                 </div>
 
+                {/* Financial Details */}
                 <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg">
-                  <h3 className="col-span-2 font-semibold">Bank Details</h3>
+                  <h3 className="col-span-2 font-semibold">Financial Details</h3>
                   <div className="space-y-1">
-                    <label className="text-sm">Bank Number</label>
+                    <label className="text-sm">Bank Account Number</label>
                     <input
                       className="w-full border rounded p-2"
-                      value={editing.bankDetails?.bankNumber || ""}
+                      value={editing.bankDetails?.bankAccountNumber || ""}
                       onChange={(e) =>
-                        setEditing((ed) => ({
-                          ...ed,
+                        setEditing((f) => ({
+                          ...f,
                           bankDetails: {
-                            ...(ed.bankDetails || {}),
-                            bankNumber: e.target.value,
+                            ...(f.bankDetails || {}),
+                            bankAccountNumber: e.target.value,
                           },
                         }))
                       }
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm">Branch</label>
-                    <input
+                    <label className="text-sm">Bank Account Type</label>
+                    <select
                       className="w-full border rounded p-2"
-                      value={editing.bankDetails?.branch || ""}
+                      value={editing.bankDetails?.bankAccountType || "Savings"}
                       onChange={(e) =>
-                        setEditing((ed) => ({
-                          ...ed,
+                        setEditing((f) => ({
+                          ...f,
                           bankDetails: {
-                            ...(ed.bankDetails || {}),
-                            branch: e.target.value,
+                            ...(f.bankDetails || {}),
+                            bankAccountType: e.target.value,
                           },
                         }))
                       }
-                    />
+                    >
+                      <option value="Savings">Savings</option>
+                      <option value="Current">Current</option>
+                      <option value="Other">Other</option>
+                    </select>
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm">Bank Name</label>
@@ -1033,11 +1682,27 @@ export default function ClientProfiles() {
                       className="w-full border rounded p-2"
                       value={editing.bankDetails?.bankName || ""}
                       onChange={(e) =>
-                        setEditing((ed) => ({
-                          ...ed,
+                        setEditing((f) => ({
+                          ...f,
                           bankDetails: {
-                            ...(ed.bankDetails || {}),
+                            ...(f.bankDetails || {}),
                             bankName: e.target.value,
+                          },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Branch Code</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={editing.bankDetails?.branchCode || ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          bankDetails: {
+                            ...(f.bankDetails || {}),
+                            branchCode: e.target.value,
                           },
                         }))
                       }
@@ -1049,10 +1714,10 @@ export default function ClientProfiles() {
                       className="w-full border rounded p-2"
                       value={editing.bankDetails?.ifscCode || ""}
                       onChange={(e) =>
-                        setEditing((ed) => ({
-                          ...ed,
+                        setEditing((f) => ({
+                          ...f,
                           bankDetails: {
-                            ...(ed.bankDetails || {}),
+                            ...(f.bankDetails || {}),
                             ifscCode: e.target.value.toUpperCase(),
                           },
                         }))
@@ -1065,11 +1730,43 @@ export default function ClientProfiles() {
                       className="w-full border rounded p-2"
                       value={editing.bankDetails?.micrCode || ""}
                       onChange={(e) =>
-                        setEditing((ed) => ({
-                          ...ed,
+                        setEditing((f) => ({
+                          ...f,
                           bankDetails: {
-                            ...(ed.bankDetails || {}),
+                            ...(f.bankDetails || {}),
                             micrCode: e.target.value,
+                          },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="col-span-2 space-y-1">
+                    <label className="text-sm">Bank Address</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={editing.bankDetails?.bankAddress || ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          bankDetails: {
+                            ...(f.bankDetails || {}),
+                            bankAddress: e.target.value,
+                          },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">LEI Number</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={editing.bankDetails?.leiNumber || ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          bankDetails: {
+                            ...(f.bankDetails || {}),
+                            leiNumber: e.target.value,
                           },
                         }))
                       }
@@ -1077,6 +1774,144 @@ export default function ClientProfiles() {
                   </div>
                 </div>
 
+                {/* Income & Net Worth */}
+                <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg">
+                  <h3 className="col-span-2 font-semibold">Income & Net Worth</h3>
+                  <div className="space-y-1">
+                    <label className="text-sm">Gross Annual Income Range</label>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={editing.grossAnnualIncomeRange || ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          grossAnnualIncomeRange: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="">Select Range</option>
+                      <option value="0-2 Lacs">0-2 Lacs</option>
+                      <option value="2-5 Lacs">2-5 Lacs</option>
+                      <option value="5-10 Lacs">5-10 Lacs</option>
+                      <option value="10-25 Lacs">10-25 Lacs</option>
+                      <option value="25+ Lacs">25+ Lacs</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Net Worth (₹)</label>
+                    <input
+                      type="number"
+                      className="w-full border rounded p-2"
+                      value={editing.netWorth || ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          netWorth: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Net Worth As On Date</label>
+                    <input
+                      type="date"
+                      className="w-full border rounded p-2"
+                      value={editing.netWorthAsOnDate ? String(editing.netWorthAsOnDate).slice(0, 10) : ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          netWorthAsOnDate: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+
+                {/* Nominee Details */}
+                <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg">
+                  <h3 className="col-span-2 font-semibold">Nominee Details</h3>
+                  <div className="space-y-1">
+                    <label className="text-sm">Nominee Name</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={editing.nominee?.name || ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          nominee: { ...(f.nominee || {}), name: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Nominee PAN</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={editing.nominee?.pan || ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          nominee: { ...(f.nominee || {}), pan: e.target.value.toUpperCase() },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="col-span-2 space-y-1">
+                    <label className="text-sm">Nominee Address</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={editing.nominee?.address || ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          nominee: { ...(f.nominee || {}), address: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Nominee Pincode</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={editing.nominee?.pincode || ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          nominee: { ...(f.nominee || {}), pincode: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Nominee Aadhaar</label>
+                    <input
+                      className="w-full border rounded p-2"
+                      value={editing.nominee?.aadhaar || ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          nominee: { ...(f.nominee || {}), aadhaar: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm">Nominee Email ID</label>
+                    <input
+                      type="email"
+                      className="w-full border rounded p-2"
+                      value={editing.nominee?.emailId || ""}
+                      onChange={(e) =>
+                        setEditing((f) => ({
+                          ...f,
+                          nominee: { ...(f.nominee || {}), emailId: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+
+                {/* Share Holdings Section */}
                 <div className="p-4 border rounded-lg">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-semibold">Share Holdings</h3>
@@ -1105,12 +1940,11 @@ export default function ClientProfiles() {
                       <div className="col-span-2 font-medium text-sm text-muted-foreground">
                         Company #{idx + 1}
                       </div>
-
                       <div className="space-y-1">
                         <label className="text-sm">Company Name *</label>
                         <input
                           className="w-full border rounded p-2"
-                          value={h.companyName}
+                          value={h.companyName || ""}
                           onChange={(e) =>
                             updateEditingShareHolding(
                               idx,
@@ -1120,12 +1954,11 @@ export default function ClientProfiles() {
                           }
                         />
                       </div>
-
                       <div className="space-y-1">
                         <label className="text-sm">ISIN Number *</label>
                         <input
                           className="w-full border rounded p-2"
-                          value={h.isinNumber}
+                          value={h.isinNumber || ""}
                           onChange={(e) =>
                             updateEditingShareHolding(
                               idx,
@@ -1135,7 +1968,6 @@ export default function ClientProfiles() {
                           }
                         />
                       </div>
-
                       <div className="space-y-1">
                         <label className="text-sm">Folio Number</label>
                         <input
@@ -1150,7 +1982,6 @@ export default function ClientProfiles() {
                           }
                         />
                       </div>
-
                       <div className="space-y-1">
                         <label className="text-sm">Certificate Number</label>
                         <input
@@ -1165,7 +1996,6 @@ export default function ClientProfiles() {
                           }
                         />
                       </div>
-
                       <div className="space-y-1">
                         <label className="text-sm">Quantity *</label>
                         <input
@@ -1181,7 +2011,6 @@ export default function ClientProfiles() {
                           }
                         />
                       </div>
-
                       <div className="space-y-1">
                         <label className="text-sm">Face Value *</label>
                         <input
@@ -1198,49 +2027,38 @@ export default function ClientProfiles() {
                           }
                         />
                       </div>
-
                       <div className="space-y-1">
                         <label className="text-sm">Distinctive From</label>
                         <input
                           className="w-full border rounded p-2"
                           value={h.distinctiveNumber?.from || ""}
                           onChange={(e) =>
-                            updateEditingShareHolding(
-                              idx,
-                              "distinctiveNumber",
-                              {
-                                ...(h.distinctiveNumber || {}),
-                                from: e.target.value,
-                              },
-                            )
+                            updateEditingShareHolding(idx, "distinctiveNumber", {
+                              ...(h.distinctiveNumber || {}),
+                              from: e.target.value,
+                            })
                           }
                         />
                       </div>
-
                       <div className="space-y-1">
                         <label className="text-sm">Distinctive To</label>
                         <input
                           className="w-full border rounded p-2"
                           value={h.distinctiveNumber?.to || ""}
                           onChange={(e) =>
-                            updateEditingShareHolding(
-                              idx,
-                              "distinctiveNumber",
-                              {
-                                ...(h.distinctiveNumber || {}),
-                                to: e.target.value,
-                              },
-                            )
+                            updateEditingShareHolding(idx, "distinctiveNumber", {
+                              ...(h.distinctiveNumber || {}),
+                              to: e.target.value,
+                            })
                           }
                         />
                       </div>
-
                       <div className="space-y-1">
                         <label className="text-sm">Purchase Date</label>
                         <input
                           type="date"
                           className="w-full border rounded p-2"
-                          value={h.purchaseDate || ""}
+                          value={h.purchaseDate ? String(h.purchaseDate).slice(0, 10) : ""}
                           onChange={(e) =>
                             updateEditingShareHolding(
                               idx,
@@ -1250,23 +2068,6 @@ export default function ClientProfiles() {
                           }
                         />
                       </div>
-
-                      <div className="space-y-1">
-                        <label className="text-sm">Review</label>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs px-2 py-0.5 rounded border">
-                            {h.review?.status || "pending"}
-                          </span>
-                          <button
-                            type="button"
-                            className="px-2 py-1 text-sm rounded border"
-                            onClick={() => setShowReviewDialog(idx)}
-                          >
-                            Review
-                          </button>
-                        </div>
-                      </div>
-
                       <div className="space-y-1">
                         <label className="text-sm">Total Value</label>
                         <input
@@ -1284,94 +2085,6 @@ export default function ClientProfiles() {
                   ))}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg">
-                  <h3 className="col-span-2 font-semibold">
-                    Additional Information
-                  </h3>
-                  <div className="space-y-1">
-                    <label className="text-sm">Current Date</label>
-                    <input
-                      type="date"
-                      className="w-full border rounded p-2"
-                      value={
-                        editing.currentDate
-                          ? String(editing.currentDate).slice(0, 10)
-                          : ""
-                      }
-                      onChange={(e) =>
-                        setEditing((ed) => ({
-                          ...ed,
-                          currentDate: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-sm">Status</label>
-                    <select
-                      className="w-full border rounded p-2"
-                      value={editing.status || "Active"}
-                      onChange={(e) =>
-                        setEditing((ed) => ({ ...ed, status: e.target.value }))
-                      }
-                    >
-                      {["Active", "Closed", "Pending", "Suspended"].map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="col-span-2 space-y-1">
-                    <label className="text-sm">Remarks</label>
-                    <input
-                      className="w-full border rounded p-2"
-                      value={editing.remarks || ""}
-                      onChange={(e) =>
-                        setEditing((ed) => ({ ...ed, remarks: e.target.value }))
-                      }
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-sm">Dividend Amount</label>
-                    <input
-                      type="number"
-                      className="w-full border rounded p-2"
-                      value={editing.dividend?.amount ?? 0}
-                      onChange={(e) =>
-                        setEditing((ed) => ({
-                          ...ed,
-                          dividend: {
-                            ...(ed.dividend || {}),
-                            amount: Number(e.target.value),
-                          },
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-sm">Dividend Date</label>
-                    <input
-                      type="date"
-                      className="w-full border rounded p-2"
-                      value={
-                        editing.dividend?.date
-                          ? String(editing.dividend.date).slice(0, 10)
-                          : ""
-                      }
-                      onChange={(e) =>
-                        setEditing((ed) => ({
-                          ...ed,
-                          dividend: {
-                            ...(ed.dividend || {}),
-                            date: e.target.value,
-                          },
-                        }))
-                      }
-                    />
-                  </div>
-                </div>
-
                 <div className="flex justify-end gap-3 pt-4 border-t">
                   <button
                     type="button"
@@ -1383,9 +2096,7 @@ export default function ClientProfiles() {
                   <button
                     onClick={onSaveEdit}
                     disabled={
-                      savingEdit ||
-                      !editing.shareholderName?.name1 ||
-                      !editing.panNumber
+                      savingEdit || !editing.shareholderName?.name1 || !editing.panNumber || !editing.clientId
                     }
                     className="bg-primary text-primary-foreground px-4 py-2 rounded disabled:opacity-50"
                   >
@@ -1395,106 +2106,6 @@ export default function ClientProfiles() {
               </div>
             </div>
           </div>
-
-          {/* Review Dialog (inside edit modal) */}
-          {showReviewDialog !== null && editing && (
-            <div className="fixed inset-0 z-50">
-              <div
-                className="absolute inset-0 bg-black/50"
-                onClick={() => setShowReviewDialog(null)}
-              />
-              <div className="absolute inset-0 grid place-items-center p-4">
-                <div className="w-full max-w-md bg-card text-foreground rounded-lg border shadow-md">
-                  <div className="p-4 border-b">
-                    <h3 className="font-semibold">Review Company</h3>
-                  </div>
-                  <div className="p-4 space-y-4">
-                    {(() => {
-                      const idx = showReviewDialog;
-                      const holding = editing.shareHoldings[idx];
-                      return (
-                        <>
-                          <div>
-                            <h4 className="font-semibold">
-                              {holding.companyName}
-                            </h4>
-                            <p className="text-sm text-muted-foreground">
-                              {holding.isinNumber}
-                            </p>
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-sm">Review Status</label>
-                            <select
-                              className="w-full border rounded p-2"
-                              value={holding.review?.status || "pending"}
-                              onChange={(e) =>
-                                updateEditingShareHolding(idx, "review", {
-                                  ...(holding.review || {}),
-                                  status: e.target.value,
-                                })
-                              }
-                            >
-                              {reviewStatusOptions.map((opt) => (
-                                <option key={opt.value} value={opt.value}>
-                                  {opt.label}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-sm">Review Notes</label>
-                            <textarea
-                              className="w-full h-24 p-2 border rounded resize-none"
-                              value={holding.review?.notes || ""}
-                              onChange={(e) =>
-                                updateEditingShareHolding(idx, "review", {
-                                  ...(holding.review || {}),
-                                  notes: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                          {holding.review?.reviewedAt && (
-                            <div className="text-xs text-muted-foreground">
-                              Last reviewed:{" "}
-                              {new Date(
-                                holding.review.reviewedAt,
-                              ).toLocaleString()}{" "}
-                              by {holding.review.reviewedBy}
-                            </div>
-                          )}
-                          <div className="flex justify-end gap-2 pt-2">
-                            <button
-                              type="button"
-                              className="px-4 py-2 rounded border"
-                              onClick={() => setShowReviewDialog(null)}
-                            >
-                              Cancel
-                            </button>
-                            <button
-                              type="button"
-                              className="px-4 py-2 rounded bg-primary text-primary-foreground"
-                              onClick={() =>
-                                saveReviewFor(
-                                  idx,
-                                  editing.shareHoldings[idx].review?.status ||
-                                    "pending",
-                                  editing.shareHoldings[idx].review?.notes ||
-                                    "",
-                                )
-                              }
-                            >
-                              Save Review
-                            </button>
-                          </div>
-                        </>
-                      );
-                    })()}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>
