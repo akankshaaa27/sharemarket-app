@@ -11,6 +11,7 @@ import Login from "./pages/Login.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
 import UserManagement from "./pages/UserManagement.jsx";
+import ExternalAPIs from "./pages/ExternalAPIs.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import { auth } from "./lib/auth.js";
@@ -36,7 +37,7 @@ function Layout({ children }) {
       <aside className="w-64 border-r bg-white shadow-lg">
         <div className="p-6">
           <h1 className="text-lg font-bold text-gray-800 mb-6">ShareMarket Manager Pro</h1>
-          
+
           {user && (
             <div className="mb-6 p-3 bg-blue-50 rounded-lg">
               <p className="text-sm font-medium text-gray-800">{user.name}</p>
@@ -49,10 +50,9 @@ function Layout({ children }) {
             <NavLink
               to="/"
               className={({ isActive }) =>
-                `px-4 py-2 rounded-lg transition ${
-                  isActive
-                    ? "bg-blue-600 text-white font-semibold"
-                    : "text-gray-700 hover:bg-gray-100"
+                `px-4 py-2 rounded-lg transition ${isActive
+                  ? "bg-blue-600 text-white font-semibold"
+                  : "text-gray-700 hover:bg-gray-100"
                 }`
               }
             >
@@ -61,10 +61,9 @@ function Layout({ children }) {
             <NavLink
               to="/profiles"
               className={({ isActive }) =>
-                `px-4 py-2 rounded-lg transition ${
-                  isActive
-                    ? "bg-blue-600 text-white font-semibold"
-                    : "text-gray-700 hover:bg-gray-100"
+                `px-4 py-2 rounded-lg transition ${isActive
+                  ? "bg-blue-600 text-white font-semibold"
+                  : "text-gray-700 hover:bg-gray-100"
                 }`
               }
             >
@@ -73,10 +72,9 @@ function Layout({ children }) {
             <NavLink
               to="/shareholders"
               className={({ isActive }) =>
-                `px-4 py-2 rounded-lg transition ${
-                  isActive
-                    ? "bg-blue-600 text-white font-semibold"
-                    : "text-gray-700 hover:bg-gray-100"
+                `px-4 py-2 rounded-lg transition ${isActive
+                  ? "bg-blue-600 text-white font-semibold"
+                  : "text-gray-700 hover:bg-gray-100"
                 }`
               }
             >
@@ -85,34 +83,40 @@ function Layout({ children }) {
             <NavLink
               to="/dmat"
               className={({ isActive }) =>
-                `px-4 py-2 rounded-lg transition ${
-                  isActive
-                    ? "bg-blue-600 text-white font-semibold"
-                    : "text-gray-700 hover:bg-gray-100"
+                `px-4 py-2 rounded-lg transition ${isActive
+                  ? "bg-blue-600 text-white font-semibold"
+                  : "text-gray-700 hover:bg-gray-100"
                 }`
               }
             >
               DMAT
             </NavLink>
 
-            {user && user.role === "admin" && (
-              <>
-                <div className="border-t border-gray-200 my-3"></div>
-                <NavLink
-                  to="/users"
-                  className={({ isActive }) =>
-                    `px-4 py-2 rounded-lg transition flex items-center gap-2 ${
-                      isActive
-                        ? "bg-blue-600 text-white font-semibold"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }`
-                  }
-                >
-                  <Users size={18} />
-                  User Management
-                </NavLink>
-              </>
-            )}
+            <div className="border-t border-gray-200 my-3"></div>
+            <NavLink
+              to="/users"
+              className={({ isActive }) =>
+                `px-4 py-2 rounded-lg transition flex items-center gap-2 ${isActive
+                  ? "bg-blue-600 text-white font-semibold"
+                  : "text-gray-700 hover:bg-gray-100"
+                }`
+              }
+            >
+              <Users size={18} />
+              User Management
+            </NavLink>
+
+            <NavLink
+              to="/external-apis"
+              className={({ isActive }) =>
+                `px-4 py-2 rounded-lg transition ${isActive
+                  ? "bg-blue-600 text-white font-semibold"
+                  : "text-gray-700 hover:bg-gray-100"
+                }`
+              }
+            >
+              External APIs
+            </NavLink>
           </nav>
 
           <div className="border-t border-gray-200 my-6"></div>
@@ -202,6 +206,8 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/external-apis" element={<Layout><ExternalAPIs /></Layout>} />
+
         <Route path="*" element={<NotFound />} />
       </Routes>
       <ToastContainer position="top-right" autoClose={3000} />

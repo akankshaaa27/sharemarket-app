@@ -40,8 +40,7 @@ function getShareHoldingsFrom(item) {
   }));
 }
 
-// Separate Review Dialog Component to fix hooks issue
-// Review Dialog Component (add this near the top of your file)
+// Review Dialog Component
 function ReviewDialog({
   showReviewDialog,
   setShowReviewDialog,
@@ -160,13 +159,13 @@ export default function ClientProfileDetails() {
 
   // UI state
   const [reviewMode, setReviewMode] = useState(false);
-  const [reviewFilter, setReviewFilter] = useState("all"); // all | ReviewStatus
+  const [reviewFilter, setReviewFilter] = useState("all");
   const [showAddCompany, setShowAddCompany] = useState(false);
   const [newCompany, setNewCompany] = useState(emptyShareHolding());
   const [editingIndex, setEditingIndex] = useState(null);
   const [editedHolding, setEditedHolding] = useState(null);
-  const [showReviewDialog, setShowReviewDialog] = useState(null); // number | null
-  const [showNotesTooltip, setShowNotesTooltip] = useState(null); // {index: number, notes: string} | null
+  const [showReviewDialog, setShowReviewDialog] = useState(null);
+  const [showNotesTooltip, setShowNotesTooltip] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -377,7 +376,7 @@ export default function ClientProfileDetails() {
           <div>
             <h1 className="text-2xl font-bold">Client Profile Details</h1>
             <p className="text-sm text-muted-foreground">
-              Profile ID: {client._id}
+              Client ID: {client.clientId || client._id}
             </p>
           </div>
         </div>
@@ -436,109 +435,264 @@ export default function ClientProfileDetails() {
         </div>
       )}
 
-      {/* Basic Information */}
+      {/* Basic Client Information */}
       <div className="rounded border p-4 bg-card">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold">Basic Information</h2>
+          <h2 className="font-semibold">Basic Client Information</h2>
           <span className="px-2 py-0.5 rounded text-xs border">
             {client.status}
           </span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <div className="text-xs text-muted-foreground">
-              Shareholder Name
-            </div>
-            <div className="font-semibold">
-              {val(client.shareholderName?.name1)}
-              {client.shareholderName?.name2 &&
-                `, ${client.shareholderName.name2}`}
-              {client.shareholderName?.name3 &&
-                `, ${client.shareholderName.name3}`}
-            </div>
+            <div className="text-xs text-muted-foreground">Client ID</div>
+            <div className="font-semibold font-mono">{val(client.clientId)}</div>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">PAN Number</div>
-            <div className="font-mono font-semibold">
-              {val(client.panNumber)}
-            </div>
+            <div className="text-xs text-muted-foreground">Short Name</div>
+            <div className="font-semibold">{val(client.shortName)}</div>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">Aadhaar Number</div>
-            <div className="font-mono font-semibold">
-              {val(client.aadhaarNumber)}
-            </div>
+            <div className="text-xs text-muted-foreground">Client Type</div>
+            <div>{val(client.clientType)}</div>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">
-              Demat Account Number
-            </div>
-            <div className="font-semibold">
-              {val(client.dematAccountNumber)}
-            </div>
+            <div className="text-xs text-muted-foreground">Account Category</div>
+            <div>{val(client.accountCategory)}</div>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">
-              Demat Account Created With
-            </div>
-            <div className="font-semibold">{val(client.dematCreatedWith)}</div>
+            <div className="text-xs text-muted-foreground">Sub Type</div>
+            <div>{val(client.subType)}</div>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">
-              DMAT Account Created By (Person)
-            </div>
-            <div className="font-semibold">
-              {val(client.dematCreatedWithPerson)}
-            </div>
+            <div className="text-xs text-muted-foreground">Standing Instruction</div>
+            <div>{val(client.standingInstruction)}</div>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">
-              Creator Contact Number
-            </div>
-            <div className="font-semibold">
-              {val(client.dematCreatedWithPersonNumber)}
-            </div>
+            <div className="text-xs text-muted-foreground">Account Activation Date</div>
+            <div>{formatDate(client.accountActivationDate)}</div>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">Current Date</div>
-            <div>{formatDate(client.currentDate)}</div>
+            <div className="text-xs text-muted-foreground">Status Change Reason</div>
+            <div>{val(client.statusChangeReason)}</div>
           </div>
-          <div className="md:col-span-2 lg:col-span-2">
-            <div className="text-xs text-muted-foreground">Address</div>
-            <div>{val(client.address)}</div>
+          <div>
+            <div className="text-xs text-muted-foreground">Status Change Date</div>
+            <div>{formatDate(client.statusChangeDate)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">DP ID</div>
+            <div className="font-mono">{val(client.dpId)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">DP Name</div>
+            <div>{val(client.dpName)}</div>
           </div>
         </div>
       </div>
 
-      {/* Bank Details */}
+      {/* Personal Details */}
       <div className="rounded border p-4 bg-card">
-        <h2 className="font-semibold mb-4">Bank Details</h2>
+        <h2 className="font-semibold mb-4">Personal Details</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="md:col-span-2 lg:col-span-3">
+            <div className="text-xs text-muted-foreground">Full Name</div>
+            <div className="font-semibold">
+              {val(client.shareholderName?.name1)}
+              {client.shareholderName?.name2 && `, ${client.shareholderName.name2}`}
+              {client.shareholderName?.name3 && `, ${client.shareholderName.name3}`}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Father/Spouse Name</div>
+            <div className="font-semibold">
+              {val(client.shareholderName?.fatherOrSpouseName)}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Occupation</div>
+            <div>{val(client.occupation)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">PAN Number</div>
+            <div className="font-mono font-semibold">{val(client.panNumber)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Aadhaar Number</div>
+            <div className="font-mono font-semibold">{val(client.aadhaarNumber)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Mobile Number</div>
+            <div className="font-semibold">{val(client.mobileNumber)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Email ID</div>
+            <div>{val(client.emailId)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">e-DIS Flag</div>
+            <div>{val(client.eDisFlag)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">One Time Declaration Flag</div>
+            <div>{val(client.oneTimeDeclarationFlag)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">SMS Facility</div>
+            <div>{val(client.smsFacility)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">PAN Flag</div>
+            <div>{val(client.panFlag)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">ATM Flag</div>
+            <div>{val(client.atmFlag)}</div>
+          </div>
+          <div className="md:col-span-2 lg:col-span-3">
+            <div className="text-xs text-muted-foreground">Address</div>
+            <div>
+              {client.address?.line1 && <div>{client.address.line1}</div>}
+              {client.address?.line2 && <div>{client.address.line2}</div>}
+              {client.address?.city && <div>{client.address.city}</div>}
+              {client.address?.state && <div>{client.address.state}</div>}
+              {client.address?.pincode && <div>{client.address.pincode}</div>}
+              {client.address?.country && <div>{client.address.country}</div>}
+              {!client.address?.line1 && val(client.address)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Financial Details */}
+      <div className="rounded border p-4 bg-card">
+        <h2 className="font-semibold mb-4">Financial Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
+            <div className="text-xs text-muted-foreground">Bank Account Number</div>
+            <div className="font-mono font-semibold">
+              {val(client.bankDetails?.bankAccountNumber)}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Bank Account Type</div>
+            <div>{val(client.bankDetails?.bankAccountType)}</div>
+          </div>
+          <div>
             <div className="text-xs text-muted-foreground">Bank Name</div>
-            <div className="font-semibold">
-              {val(client.bankDetails?.bankName)}
-            </div>
+            <div className="font-semibold">{val(client.bankDetails?.bankName)}</div>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">Account Number</div>
-            <div className="font-mono">
-              {val(client.bankDetails?.bankNumber)}
-            </div>
-          </div>
-          <div>
-            <div className="text-xs text-muted-foreground">Branch</div>
-            <div>{val(client.bankDetails?.branch)}</div>
+            <div className="text-xs text-muted-foreground">Branch Code</div>
+            <div className="font-mono">{val(client.bankDetails?.branchCode)}</div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground">IFSC Code</div>
-            <div className="font-mono font-semibold">
-              {val(client.bankDetails?.ifscCode)}
-            </div>
+            <div className="font-mono font-semibold">{val(client.bankDetails?.ifscCode)}</div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground">MICR Code</div>
             <div className="font-mono">{val(client.bankDetails?.micrCode)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">LEI Number</div>
+            <div>{val(client.bankDetails?.leiNumber)}</div>
+          </div>
+          <div className="md:col-span-2 lg:col-span-3">
+            <div className="text-xs text-muted-foreground">Bank Address</div>
+            <div>{val(client.bankDetails?.bankAddress)}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Income & Net Worth */}
+      <div className="rounded border p-4 bg-card">
+        <h2 className="font-semibold mb-4">Income & Net Worth</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <div className="text-xs text-muted-foreground">Gross Annual Income Range</div>
+            <div className="font-semibold">{val(client.grossAnnualIncomeRange)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Net Worth (₹)</div>
+            <div className="font-semibold">{formatCurrency(client.netWorth)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Net Worth As On Date</div>
+            <div>{formatDate(client.netWorthAsOnDate)}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Additional Flags */}
+      <div className="rounded border p-4 bg-card">
+        <h2 className="font-semibold mb-4">Additional Flags</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <div className="text-xs text-muted-foreground">Family Flag (Mobile)</div>
+            <div>{val(client.familyFlagMobile)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Family Flag (Email)</div>
+            <div>{val(client.familyFlagEmail)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Receive Physical Communications</div>
+            <div>{val(client.receivePhysicalCommunicationsFlag)}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Nominee Details */}
+      <div className="rounded border p-4 bg-card">
+        <h2 className="font-semibold mb-4">Nominee Details</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <div className="text-xs text-muted-foreground">Nominee Name</div>
+            <div className="font-semibold">{val(client.nominee?.name)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Nominee PAN</div>
+            <div className="font-mono">{val(client.nominee?.pan)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Nominee Aadhaar</div>
+            <div>{val(client.nominee?.aadhaar)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Nominee Email ID</div>
+            <div>{val(client.nominee?.emailId)}</div>
+          </div>
+          <div className="md:col-span-2 lg:col-span-3">
+            <div className="text-xs text-muted-foreground">Nominee Address</div>
+            <div>{val(client.nominee?.address)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Nominee Pincode</div>
+            <div>{val(client.nominee?.pincode)}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Demat Account Details */}
+      <div className="rounded border p-4 bg-card">
+        <h2 className="font-semibold mb-4">Demat Account Details</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <div className="text-xs text-muted-foreground">Demat Account Number</div>
+            <div className="font-semibold font-mono">{val(client.dematAccountNumber)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Demat Created With</div>
+            <div>{val(client.dematCreatedWith)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Created By (Person)</div>
+            <div>{val(client.dematCreatedWithPerson)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Creator Contact Number</div>
+            <div>{val(client.dematCreatedWithPersonNumber)}</div>
           </div>
         </div>
       </div>
