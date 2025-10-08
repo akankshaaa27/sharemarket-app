@@ -114,6 +114,11 @@ const DividendSchema = new Schema(
 
 const ClientProfileSchema = new Schema(
   {
+    client: {
+      type: Schema.Types.ObjectId,
+      ref: "Client",
+      index: true,
+    },
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User",

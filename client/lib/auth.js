@@ -1,21 +1,32 @@
 const API_BASE = "/api";
 
+const ADMIN_USERNAME = "admin";
+const ADMIN_PASSWORD = "1234";
+
+function setLocalAdminSession() {
+  const user = {
+    id: "local-admin",
+    username: ADMIN_USERNAME,
+    name: "Administrator",
+    email: "admin@local",
+    role: "admin",
+  };
+  localStorage.setItem("isAdminLoggedIn", "true");
+  localStorage.setItem("user", JSON.stringify(user));
+  return { user };
+}
+
 export const auth = {
   async login(emailOrUsername, password) {
-    const res = await fetch(`${API_BASE}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ emailOrUsername, password }),
-    });
-    
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || "Login failed");
+    const identifier = String(emailOrUsername || "").trim().toLowerCase();
+    const pass = String(password || "").trim();
+
+    // Frontend-only admin login (no API, no JWT)
+    if (identifier === ADMIN_USERNAME && pass === ADMIN_PASSWORD) {
+      return setLocalAdminSession();
     }
-    
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-    return data;
+
+    throw new Error("Invalid username or password");
   },
 
   async register(userData) {
@@ -79,32 +90,30 @@ export const auth = {
   },
 
   async getMe() {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      throw new Error("No token found");
+    // Return local admin session if present
+    if (localStorage.getItem("isAdminLoggedIn") === "true") {
+      const user = this.getUser() || {
+        id: "local-admin",
+        username: ADMIN_USERNAME,
+        name: "Administrator",
+        email: "admin@local",
+        role: "admin",
+      };
+      localStorage.setItem("user", JSON.stringify(user));
+      return user;
     }
 
-    const res = await fetch(`${API_BASE}/auth/me`, {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-      },
-    });
-    
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || "Failed to get user");
-    }
-    
-    localStorage.setItem("user", JSON.stringify(data.user));
-    return data.user;
+    throw new Error("Not authenticated");
   },
 
   logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("isAdminLoggedIn");
   },
 
   getToken() {
+    // No JWT in frontend-only admin flow; kept for compatibility
     return localStorage.getItem("token");
   },
 
@@ -114,10 +123,11 @@ export const auth = {
   },
 
   isAuthenticated() {
-    return !!this.getToken();
+    return localStorage.getItem("isAdminLoggedIn") === "true" || !!this.getToken();
   },
 
   isAdmin() {
+    if (localStorage.getItem("isAdminLoggedIn") === "true") return true;
     const user = this.getUser();
     return user && user.role === "admin";
   },
