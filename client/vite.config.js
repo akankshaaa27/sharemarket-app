@@ -11,15 +11,33 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['lucide-react'], // ✅ pre-bundle for Vite
+    include: ["lucide-react"], // pre-bundle lucide-react
   },
   server: {
     port: 5000,
     host: "0.0.0.0",
     strictPort: true,
-    allowedHosts: true,
     hmr: { clientPort: 5000 },
     proxy: { "/api": "http://localhost:3000" },
   },
-  build: { outDir: "dist/spa" },
+  build: {
+    outDir: "dist/spa",
+    sourcemap: false,
+    chunkSizeWarningLimit: 1500, // Increase if some chunks are large
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("react") || id.includes("lucide-react")) {
+              return "vendor-react"; // split react & lucide-react
+            }
+            return "vendor"; // split other node_modules
+          }
+        },
+      },
+    },
+  },
+  optimizeDeps: {
+    include: ["lucide-react"],
+  },
 });
