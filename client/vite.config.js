@@ -11,7 +11,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ["lucide-react"], // pre-bundle lucide-react
+    include: ['lucide-react', 'recharts'],
   },
   server: {
     port: 5000,

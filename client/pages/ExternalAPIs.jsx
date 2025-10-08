@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getQuote, getCorporateActions } from "../lib/services/nseService.js";
 import { getHistorical } from "../lib/services/moneycontrolService.js";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+// import { LineChart, Line, XAxis, YAxis, Tooltip } from 'recharts';
 
 const DEFAULT_SYMBOL = "INFY";
 const REFRESH_MS = 2 * 60 * 1000; // 2 minutes
