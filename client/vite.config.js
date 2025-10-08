@@ -22,5 +22,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./client"),
       "@shared": path.resolve(__dirname, "./shared"),
     },
+    optimizeDeps: {
+      include: ['lucide-react']
+    },
+
   },
 });
