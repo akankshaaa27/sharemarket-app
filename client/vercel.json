@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "buildCommand": "pnpm run build:client",
+  "outputDirectory": "dist/spa",
+  "framework": "vite",
+  "routes": [
+    { "src": "/(.*)", "dest": "dist/spa/$1" }
+  ]
+}
