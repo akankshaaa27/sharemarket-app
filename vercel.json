@@ -5,9 +5,6 @@
   "outputDirectory": "client/dist/spa",
   "framework": "vite",
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "client/dist/spa/$1"
-    }
+    { "src": "/(.*)", "dest": "client/dist/spa/$1" }
   ]
 }
