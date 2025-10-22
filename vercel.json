@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "installCommand": "cd client && pnpm install",
+  "installCommand": "cd client && pnpm install --no-frozen-lockfile",
   "buildCommand": "cd client && pnpm run build:client",
   "outputDirectory": "client/dist/spa",
   "framework": "vite",
