@@ -1,4 +1,4 @@
-const API_BASE = "/api";
+const API_BASE = (typeof __API_BASE__ !== "undefined" && __API_BASE__) ? __API_BASE__ : "/api";
 
 const ADMIN_USERNAME = "admin";
 const ADMIN_PASSWORD = "1234";
@@ -35,7 +35,7 @@ export const auth = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData),
     });
-    
+
     const data = await res.json();
     if (!res.ok) {
       throw new Error(data.error || "Registration failed");
@@ -49,7 +49,7 @@ export const auth = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
     });
-    
+
     const data = await res.json();
     if (!res.ok) {
       throw new Error(data.error || "Failed to send reset email");
@@ -63,7 +63,7 @@ export const auth = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password }),
     });
-    
+
     const data = await res.json();
     if (!res.ok) {
       throw new Error(data.error || "Password reset failed");
@@ -81,7 +81,7 @@ export const auth = {
       },
       body: JSON.stringify({ currentPassword, newPassword }),
     });
-    
+
     const data = await res.json();
     if (!res.ok) {
       throw new Error(data.error || "Password change failed");
