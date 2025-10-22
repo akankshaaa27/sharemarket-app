@@ -1,10 +1,14 @@
 {
   "version": 2,
-  "installCommand": "cd client && pnpm install --no-frozen-lockfile",
-  "buildCommand": "cd client && pnpm run build:client",
-  "outputDirectory": "client/dist/spa",
-  "framework": "vite",
+  "builds": [
+    {
+      "src": "client/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist/spa", "buildCommand": "pnpm run build:client" }
+    }
+  ],
   "routes": [
-    { "src": "/(.*)", "dest": "client/dist/spa/$1" }
+    { "src": "/_next/static/(.*)", "dest": "/_next/static/$1" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
