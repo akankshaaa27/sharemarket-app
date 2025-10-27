@@ -1,13 +1,16 @@
-import * as XLSX from "xlsx";
+// ✅ Vite-safe Excel export utilities (works on Vercel too)
+export async function exportToExcel(data, filename) {
+  const XLSX = await import("xlsx"); // <-- dynamic import fixes build/runtime issues
 
-export function exportToExcel(data, filename) {
   const ws = XLSX.utils.json_to_sheet(data);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
   XLSX.writeFile(wb, `${filename}.xlsx`);
 }
 
-export function exportClientProfileToExcel(profile) {
+export async function exportClientProfileToExcel(profile) {
+  const XLSX = await import("xlsx"); // dynamic import again for safety
+
   const data = [
     { Field: "Profile ID", Value: profile._id || "" },
     { Field: "Shareholder Name", Value: profile.shareholderName?.name1 || "" },
@@ -32,10 +35,15 @@ export function exportClientProfileToExcel(profile) {
     });
   }
 
-  exportToExcel(data, `client_profile_${profile.panNumber || profile._id}`);
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Client Profile");
+  XLSX.writeFile(wb, `client_profile_${profile.panNumber || profile._id}.xlsx`);
 }
 
-export function exportAllClientProfilesToExcel(profiles) {
+export async function exportAllClientProfilesToExcel(profiles) {
+  const XLSX = await import("xlsx");
+
   const data = profiles.map((profile) => ({
     "Profile ID": profile._id || "",
     "Shareholder Name": profile.shareholderName?.name1 || "",
@@ -48,5 +56,8 @@ export function exportAllClientProfilesToExcel(profiles) {
     "Total Companies": profile.companies?.length || 0,
   }));
 
-  exportToExcel(data, `all_client_profiles_${new Date().toISOString().split("T")[0]}`);
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "All Client Profiles");
+  XLSX.writeFile(wb, `all_client_profiles_${new Date().toISOString().split("T")[0]}.xlsx`);
 }
