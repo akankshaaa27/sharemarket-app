@@ -6,8 +6,8 @@ export default defineConfig(({ mode }) => ({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"), // ✅ Changed from ./client to ./src (frontend source)
-      "@shared": path.resolve(__dirname, "../shared")
+      "@": path.resolve(__dirname, "./src"), // frontend source
+      "@shared": path.resolve(__dirname, "../shared"),
     },
   },
   optimizeDeps: {
@@ -18,19 +18,20 @@ export default defineConfig(({ mode }) => ({
     host: "0.0.0.0",
     strictPort: true,
     hmr: { clientPort: 5000 },
-    // Only proxy in development
-    ...(mode === 'development' ? {
-      proxy: {
-        '/api': {
-          target: 'http://localhost:3000',
-          changeOrigin: true,
-          secure: false,
+    ...(mode === "development"
+      ? {
+        proxy: {
+          "/api": {
+            target: "http://localhost:3000",
+            changeOrigin: true,
+            secure: false,
+          },
         },
-      },
-    } : {})
+      }
+      : {}),
   },
 
-  // Force production to always use Render backend
+  // ✅ Define backend URL (for production)
   define: {
     __API_BASE__: JSON.stringify("https://sharemarket-app.onrender.com"),
   },
@@ -40,6 +41,9 @@ export default defineConfig(({ mode }) => ({
     sourcemap: false,
     chunkSizeWarningLimit: 1500,
     rollupOptions: {
+      // ✅ Prevent Vite from bundling xlsx
+      external: ["xlsx"],
+
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
