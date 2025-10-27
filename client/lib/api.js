@@ -1,5 +1,5 @@
-// Force use of Render backend
-const API_BASE = "https://sharemarket-app.onrender.com";
+// Force use of Render backend (include /api prefix)
+const API_BASE = "https://sharemarket-app.onrender.com/api";
 
 export async function apiFetch(path, opts = {}) {
   return fetch(`${API_BASE}${path}`, opts);
