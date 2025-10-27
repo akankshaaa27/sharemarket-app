@@ -18,22 +18,21 @@ export default defineConfig(({ mode }) => ({
     host: "0.0.0.0",
     strictPort: true,
     hmr: { clientPort: 5000 },
-    proxy: {
-      "/api": {
-        target: "http://localhost:3000",
-        changeOrigin: true,
-        secure: false,
+    // Only proxy in development
+    ...(mode === 'development' ? {
+      proxy: {
+        '/api': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+          secure: false,
+        },
       },
-    },
+    } : {})
   },
 
-  // ✅ Define environment variable for frontend API calls
+  // Force production to always use Render backend
   define: {
-    __API_BASE__: JSON.stringify(
-      mode === "production"
-        ? "https://sharemarket-app.onrender.com" // your backend on Render
-        : "http://localhost:3000"
-    ),
+    __API_BASE__: JSON.stringify("https://sharemarket-app.onrender.com"),
   },
 
   build: {

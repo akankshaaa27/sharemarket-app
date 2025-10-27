@@ -1,6 +1,4 @@
-// const API_BASE = "/api";
-const API_BASE = "https://sharemarket-app.onrender.com/api";
-
+const API_BASE = "/api";
 
 async function requestWithAuth(path, options = {}) {
   const token = localStorage.getItem("token");
