@@ -1,9 +1,6 @@
 // auth.js
-// Force production API to Render; use local env in dev
-const API_BASE =
-  (import.meta.env.PROD
-    ? "https://sharemarket-app.onrender.com"
-    : import.meta.env.VITE_API_BASE_URL || "http://localhost:3000");
+// Force production API to Render
+const API_BASE = "https://sharemarket-app.onrender.com";
 
 const ADMIN_USERNAME = "admin";
 const ADMIN_PASSWORD = "1234";
