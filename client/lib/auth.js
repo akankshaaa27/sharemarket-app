@@ -1,11 +1,9 @@
 // auth.js
-// Prefer Vite-injected __API_BASE__ (set in vite.config). Fallbacks: VITE_API_BASE_URL -> vercel->render -> localhost
+// Force production API to Render; use local env in dev
 const API_BASE =
-  (typeof __API_BASE__ !== "undefined" && __API_BASE__) ||
-  import.meta.env.VITE_API_BASE_URL ||
-  (typeof window !== "undefined" && window.location.hostname.includes("vercel.app")
+  (import.meta.env.PROD
     ? "https://sharemarket-app.onrender.com"
-    : "http://localhost:3000");
+    : import.meta.env.VITE_API_BASE_URL || "http://localhost:3000");
 
 const ADMIN_USERNAME = "admin";
 const ADMIN_PASSWORD = "1234";
@@ -105,7 +103,17 @@ export const auth = {
       localStorage.setItem("user", JSON.stringify(user));
       return user;
     }
-    throw new Error("Not authenticated");
+
+    const token = this.getToken();
+    if (!token) throw new Error("Not authenticated");
+
+    const res = await fetch(`${API_BASE}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to fetch user");
+    localStorage.setItem("user", JSON.stringify(data.user || {}));
+    return data.user;
   },
 
   logout() {
