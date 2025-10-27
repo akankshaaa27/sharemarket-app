@@ -1,9 +1,9 @@
 {
   "version": 2,
-  "buildCommand": "pnpm run build:client",
-  "outputDirectory": "dist/spa",
+  "buildCommand": "cd client && pnpm install && pnpm run build",
+  "outputDirectory": "client/dist",
   "framework": "vite",
   "routes": [
-    { "src": "/(.*)", "dest": "dist/spa/$1" }
+    { "src": "/(.*)", "dest": "client/dist/$1" }
   ]
 }
