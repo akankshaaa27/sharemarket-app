@@ -1,10 +1,11 @@
 // auth.js
-// auth.js
+// Prefer Vite-injected __API_BASE__ (set in vite.config). Fallbacks: VITE_API_BASE_URL -> vercel->render -> localhost
 const API_BASE =
+  (typeof __API_BASE__ !== "undefined" && __API_BASE__) ||
   import.meta.env.VITE_API_BASE_URL ||
-  window.location.origin.includes("vercel.app")
+  (typeof window !== "undefined" && window.location.hostname.includes("vercel.app")
     ? "https://sharemarket-app.onrender.com"
-    : "http://localhost:3000";
+    : "http://localhost:3000");
 
 const ADMIN_USERNAME = "admin";
 const ADMIN_PASSWORD = "1234";
