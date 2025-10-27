@@ -1,8 +1,10 @@
 // auth.js
+// auth.js
 const API_BASE =
-  typeof import.meta.env.VITE_API_BASE_URL !== "undefined"
-    ? import.meta.env.VITE_API_BASE_URL
-    : "/api";
+  import.meta.env.VITE_API_BASE_URL ||
+  window.location.origin.includes("vercel.app")
+    ? "https://sharemarket-app.onrender.com"
+    : "http://localhost:3000";
 
 const ADMIN_USERNAME = "admin";
 const ADMIN_PASSWORD = "1234";
