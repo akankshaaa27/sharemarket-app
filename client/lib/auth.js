@@ -32,7 +32,17 @@ export const auth = {
       return setLocalAdminSession();
     }
 
-    throw new Error("Invalid username or password");
+    // Real login should call API when not local admin
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ identifier, password: pass }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Login failed");
+    localStorage.setItem("token", data.token || "");
+    localStorage.setItem("user", JSON.stringify(data.user || {}));
+    return data;
   },
 
   async register(userData) {
