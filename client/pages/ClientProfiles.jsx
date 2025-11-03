@@ -1242,4 +1242,4 @@ export default function ClientProfiles() {
       )}
     </div>
   );
-}
+} 
