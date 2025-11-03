@@ -1,6 +1,6 @@
 // auth.js
-// Force production API to Render
-const API_BASE = "https://sharemarket-app.onrender.com";
+// Prefer env-configured API base (development via .env), fallback to Render production API (includes /api)
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://sharemarket-app.onrender.com/api";
 
 const ADMIN_USERNAME = "admin";
 const ADMIN_PASSWORD = "1234";
@@ -27,11 +27,11 @@ export const auth = {
       return setLocalAdminSession();
     }
 
-    // Real login should call API when not local admin
+    // Real login calls backend
     const res = await fetch(`${API_BASE}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ identifier, password: pass }),
+      body: JSON.stringify({ emailOrUsername: identifier, password: pass }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Login failed");
