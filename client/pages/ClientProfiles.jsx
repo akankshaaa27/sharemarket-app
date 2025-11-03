@@ -158,7 +158,7 @@ export default function ClientProfiles() {
     setError("");
     try {
       const payload = { ...form, companies: form.shareHoldings };
-      
+
       if (editingProfile) {
         // Update existing profile
         await api.updateProfile(editingProfile._id, payload);
@@ -168,7 +168,7 @@ export default function ClientProfiles() {
         await api.createProfile(payload);
         toast.success("Client profile created successfully");
       }
-      
+
       setModalOpen(false);
       setForm(initialForm());
       setEditingProfile(null);
@@ -194,39 +194,55 @@ export default function ClientProfiles() {
   }
 
   async function onOpenEdit(profile) {
+    const makeSource = (src) => {
+      const base = initialForm();
+      // merge top-level and nested defaults
+      const address = { ...base.address, ...(src.address || {}) };
+      const shareholderName = { ...base.shareholderName, ...(src.shareholderName || {}) };
+      const bankDetails = { ...base.bankDetails, ...(src.bankDetails || {}) };
+      const nominee = { ...base.nominee, ...(src.nominee || {}) };
+
+      const rawHoldings =
+        (src.companies && Array.isArray(src.companies) && src.companies) ||
+        (Array.isArray(src.shareHoldings) && src.shareHoldings) ||
+        [];
+
+      const shareHoldings =
+        rawHoldings.length > 0
+          ? rawHoldings.map((h) => ({
+              ...emptyHolding(),
+              ...h,
+              distinctiveNumber: {
+                ...(emptyHolding().distinctiveNumber || {}),
+                ...(h.distinctiveNumber || {}),
+              },
+              purchaseDate: h.purchaseDate ? String(h.purchaseDate).slice(0, 10) : emptyHolding().purchaseDate,
+            }))
+          : [emptyHolding()];
+
+      return {
+        ...base,
+        ...src,
+        address,
+        shareholderName,
+        bankDetails,
+        nominee,
+        shareHoldings,
+      };
+    };
+
     try {
       const full = await api.getProfile(profile._id);
-      const shareHoldings =
-        full.companies && Array.isArray(full.companies)
-          ? full.companies
-          : full.shareHoldings || [];
-      
-      setForm({
-        ...full,
-        shareHoldings: shareHoldings.map((h) => ({
-          companyName: h.companyName || "",
-          isinNumber: h.isinNumber || "",
-          folioNumber: h.folioNumber || "",
-          certificateNumber: h.certificateNumber || "",
-          distinctiveNumber: h.distinctiveNumber || { from: "", to: "" },
-          quantity: h.quantity || 0,
-          faceValue: h.faceValue || 0,
-          purchaseDate: h.purchaseDate
-            ? String(h.purchaseDate).slice(0, 10)
-            : "",
-          review: h.review || {
-            status: "pending",
-            notes: "",
-            reviewedAt: "",
-            reviewedBy: "",
-          },
-        })),
-      });
+      const source = makeSource(full);
+      setForm(source);
       setEditingProfile(full);
       setModalOpen(true);
     } catch (e) {
-      setError(e.message);
-      toast.error(`Error: ${e.message}`);
+      toast.error(`Failed to load full profile. Opening edit with available data.`);
+      const source = makeSource(profile);
+      setForm(source);
+      setEditingProfile(profile);
+      setModalOpen(true);
     }
   }
 
@@ -260,8 +276,8 @@ export default function ClientProfiles() {
 
   const isEditMode = !!editingProfile;
   const modalTitle = isEditMode ? "Edit Client Profile" : "Create Client Profile";
-  const saveButtonText = saving 
-    ? (isEditMode ? "Saving..." : "Creating...") 
+  const saveButtonText = saving
+    ? (isEditMode ? "Saving..." : "Creating...")
     : (isEditMode ? "Save Changes" : "Create Client Profile");
 
   return (
